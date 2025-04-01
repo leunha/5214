@@ -44,6 +44,7 @@ def display_paired_images(t1_array, t2_array):
         valstep=1
     )
     
+    
     # Update functions for sliders
     def update1(val):
         frame = int(frame_slider1.val)
