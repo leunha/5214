@@ -296,11 +296,9 @@ def main(args):
     sample_batch = next(iter(test_loader))
     img_size = sample_batch[0].shape[2]
     
-    # Create model with the correct architecture
-    if 'features' in model_args:
-        features = model_args['features']
-    else:
-        features = [32, 64, 128, 256]  # Default
+    # Create model with the same configuration as training
+    features = model_args.get('features', [32, 64, 128])  # Use the features from training
+    print(f"Creating model with features: {features}")
     
     model = MonaiRectifiedFlow(
         img_size=img_size,
@@ -323,9 +321,20 @@ def main(args):
         test_samples=args.max_test_batches
     )
     
-    # If reflowed model exists, also evaluate it
-    reflowed_path = args.model_path.replace('final_model.pt', 'reflowed_model.pt')
-    if os.path.exists(reflowed_path):
+    # Check for reflowed model
+    reflowed_path = None
+    model_dir = os.path.dirname(args.model_path)
+    
+    # Try standard naming convention
+    standard_reflowed_path = args.model_path.replace('final_model.pt', 'reflowed_model.pt')
+    if os.path.exists(standard_reflowed_path):
+        reflowed_path = standard_reflowed_path
+    # Try looking in the same directory
+    elif os.path.exists(os.path.join(model_dir, 'reflowed_model.pt')):
+        reflowed_path = os.path.join(model_dir, 'reflowed_model.pt')
+    
+    # Only evaluate reflowed model if we actually found one
+    if reflowed_path and os.path.exists(reflowed_path) and reflowed_path != args.model_path:
         print(f"\nEvaluating reflowed model: {reflowed_path}")
         
         reflowed_checkpoint = torch.load(reflowed_path, map_location=args.device)
@@ -385,6 +394,8 @@ def main(args):
         plt.tight_layout()
         plt.savefig(os.path.join(args.output_dir, 'comparison.png'))
         plt.close()
+    else:
+        print("\nNo valid reflowed model found. Skipping comparison.")
     
     print(f"Evaluation results saved to {args.output_dir}")
 

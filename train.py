@@ -2,132 +2,217 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, Dataset
-import numpy as np
+from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-import argparse
-import time
+import numpy as np
+from datetime import datetime
 
-from rectified_flow import ImageRectifiedFlow, RectifiedFlow, train_rectified_flow
+from _2d_dataset import MRISliceDataset
 
-class MRIDataset(Dataset):
-    """
-    Dataset for paired MRI images (T1 and T2)
-    """
-    def __init__(self, t1_dir, t2_dir, transform=None):
-        """
-        Args:
-            t1_dir: Directory with T1 images
-            t2_dir: Directory with T2 images
-            transform: Optional transform to apply to the data
-        """
-        self.t1_files = sorted([os.path.join(t1_dir, f) for f in os.listdir(t1_dir) if f.endswith('.npy')])
-        self.t2_files = sorted([os.path.join(t2_dir, f) for f in os.listdir(t2_dir) if f.endswith('.npy')])
+class LightweightUNet(nn.Module):
+    def __init__(self, in_channels=1, out_channels=1):
+        super().__init__()
         
-        # Ensure we have matching T1 and T2 files
-        t1_subjects = [os.path.basename(f).split('-')[1] for f in self.t1_files]
-        t2_subjects = [os.path.basename(f).split('-')[1] for f in self.t2_files]
+        # Reduced number of features for faster training
+        self.enc1 = self._make_layer(in_channels, 32)
+        self.enc2 = self._make_layer(32, 64)
+        self.enc3 = self._make_layer(64, 128)
         
-        # Find common subjects
-        common_subjects = set(t1_subjects).intersection(set(t2_subjects))
+        self.dec3 = self._make_layer(128, 64)
+        self.dec2 = self._make_layer(64, 32)
+        self.dec1 = self._make_layer(32, out_channels)
         
-        # Filter files to only include common subjects
-        self.t1_files = [f for f in self.t1_files if os.path.basename(f).split('-')[1] in common_subjects]
-        self.t2_files = [f for f in self.t2_files if os.path.basename(f).split('-')[1] in common_subjects]
+        self.pool = nn.MaxPool2d(2)
+        self.upsample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
         
-        # Sort to ensure corresponding pairs
-        self.t1_files.sort()
-        self.t2_files.sort()
-        
-        self.transform = transform
-        
-        print(f"Dataset contains {len(self.t1_files)} paired samples")
+    def _make_layer(self, in_channels, out_channels):
+        return nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, 3, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_channels, out_channels, 3, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True)
+        )
     
-    def __len__(self):
-        return len(self.t1_files)
+    def forward(self, x):
+        # Encoder
+        e1 = self.enc1(x)
+        e2 = self.enc2(self.pool(e1))
+        e3 = self.enc3(self.pool(e2))
+        
+        # Decoder with skip connections
+        d3 = self.dec3(self.upsample(e3))
+        d2 = self.dec2(self.upsample(d3 + e2))
+        d1 = self.dec1(d2 + e1)
+        
+        return d1
+
+def train_epoch(model, train_loader, criterion, optimizer, device):
+    model.train()
+    total_loss = 0
     
-    def __getitem__(self, idx):
-        # Load the T1 and T2 images
-        t1_img = np.load(self.t1_files[idx])
-        t2_img = np.load(self.t2_files[idx])
+    for t1_images, t2_images in tqdm(train_loader, desc="Training"):
+        t1_images = t1_images.to(device)
+        t2_images = t2_images.to(device)
         
-        # Convert to tensors
-        t1_tensor = torch.from_numpy(t1_img).float()
-        t2_tensor = torch.from_numpy(t2_img).float()
+        optimizer.zero_grad()
+        outputs = model(t1_images)
+        loss = criterion(outputs, t2_images)
         
-        # Handle the case where T1 has more slices than T2
-        if len(t1_tensor.shape) == 3 and len(t2_tensor.shape) == 3:
-            t1_slices = t1_tensor.shape[2]
-            t2_slices = t2_tensor.shape[2]
+        loss.backward()
+        optimizer.step()
+        
+        total_loss += loss.item()
+    
+    return total_loss / len(train_loader)
+
+def validate(model, val_loader, criterion, device):
+    model.eval()
+    total_loss = 0
+    
+    with torch.no_grad():
+        for t1_images, t2_images in tqdm(val_loader, desc="Validation"):
+            t1_images = t1_images.to(device)
+            t2_images = t2_images.to(device)
             
-            # Check if T1 has more slices than T2
-            if t1_slices > t2_slices:
-                # Calculate offset to center the T1 slices relative to T2
-                # This assumes the extra slices in T1 are distributed evenly at the beginning and end
-                offset = (t1_slices - t2_slices) // 2
-                
-                # If T1 has exactly 20 more slices, use this specific offset
-                if t1_slices - t2_slices == 20:
-                    offset = 10  # Half of the 20 extra slices
-                
-                # Select a random slice from T2's range
-                t2_slice_idx = np.random.randint(0, t2_slices)
-                # Map to corresponding T1 slice with offset
-                t1_slice_idx = t2_slice_idx + offset
-                
-                # Safety check to ensure indices are valid
-                t1_slice_idx = min(max(0, t1_slice_idx), t1_slices - 1)
-                t2_slice_idx = min(max(0, t2_slice_idx), t2_slices - 1)
-                
-                # Extract slices
-                t1_slice = t1_tensor[:, :, t1_slice_idx]
-                t2_slice = t2_tensor[:, :, t2_slice_idx]
-            else:
-                # If T1 and T2 have same number of slices or T2 has more (unexpected case)
-                # Pick a common range and select a random slice
-                common_slices = min(t1_slices, t2_slices)
-                slice_idx = np.random.randint(0, common_slices)
-                t1_slice = t1_tensor[:, :, slice_idx]
-                t2_slice = t2_tensor[:, :, slice_idx]
-        else:
-            # Handle the case where one or both are not 3D
-            t1_slice = t1_tensor
-            t2_slice = t2_tensor
-        
-        # Normalize to [0, 1]
-        t1_slice = (t1_slice - t1_slice.min()) / (t1_slice.max() - t1_slice.min() + 1e-8)
-        t2_slice = (t2_slice - t2_slice.min()) / (t2_slice.max() - t2_slice.min() + 1e-8)
-        
-        # Add channel dimension
-        t1_slice = t1_slice.unsqueeze(0)
-        t2_slice = t2_slice.unsqueeze(0)
-        
-        # Ensure consistent size (e.g., 256x256)
-        if t1_slice.shape[1] != 256 or t1_slice.shape[2] != 256:
-            t1_slice = torch.nn.functional.interpolate(t1_slice.unsqueeze(0), size=(256, 256), mode='bilinear').squeeze(0)
-            t2_slice = torch.nn.functional.interpolate(t2_slice.unsqueeze(0), size=(256, 256), mode='bilinear').squeeze(0)
-        
-        if self.transform:
-            t1_slice = self.transform(t1_slice)
-            t2_slice = self.transform(t2_slice)
-        
-        return t1_slice, t2_slice
+            outputs = model(t1_images)
+            loss = criterion(outputs, t2_images)
+            
+            total_loss += loss.item()
+    
+    return total_loss / len(val_loader)
 
-def save_checkpoint(model, optimizer, epoch, loss, checkpoint_dir):
-    """Save model checkpoint"""
-    os.makedirs(checkpoint_dir, exist_ok=True)
-    checkpoint_path = os.path.join(checkpoint_dir, f'model_epoch_{epoch}.pt')
-    torch.save({
-        'epoch': epoch,
-        'model_state_dict': model.state_dict(),
-        'optimizer_state_dict': optimizer.state_dict(),
-        'loss': loss,
-    }, checkpoint_path)
-    print(f"Checkpoint saved to {checkpoint_path}")
+def visualize_results(model, val_loader, device, epoch, save_dir):
+    model.eval()
+    
+    # Get a batch of validation data
+    t1_images, t2_images = next(iter(val_loader))
+    
+    with torch.no_grad():
+        t1_images = t1_images.to(device)
+        outputs = model(t1_images)
+    
+    # Move tensors to CPU and convert to numpy
+    t1_images = t1_images.cpu()
+    t2_images = t2_images.cpu()
+    outputs = outputs.cpu()
+    
+    # Create visualization
+    fig, axes = plt.subplots(3, 4, figsize=(15, 10))
+    for i in range(4):
+        # Display T1 input
+        axes[0, i].imshow(t1_images[i, 0], cmap='gray')
+        axes[0, i].set_title('T1 Input')
+        axes[0, i].axis('off')
+        
+        # Display T2 ground truth
+        axes[1, i].imshow(t2_images[i, 0], cmap='gray')
+        axes[1, i].set_title('T2 Ground Truth')
+        axes[1, i].axis('off')
+        
+        # Display model output
+        axes[2, i].imshow(outputs[i, 0], cmap='gray')
+        axes[2, i].set_title('Model Output')
+        axes[2, i].axis('off')
+    
+    plt.suptitle(f'Results after epoch {epoch}')
+    plt.tight_layout()
+    
+    # Save the figure
+    os.makedirs(save_dir, exist_ok=True)
+    plt.savefig(os.path.join(save_dir, f'results_epoch_{epoch}.png'))
+    plt.close()
 
 def main():
-    pass
-#write the main function later
+    # Training parameters
+    batch_size = 8
+    num_epochs = 3
+    learning_rate = 0.001
+    device = torch.device('cpu')  # Use CPU for laptop training
+    
+    # Create save directory with timestamp
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    save_dir = f'training_results_{timestamp}'
+    os.makedirs(save_dir, exist_ok=True)
+    
+    # Create dataset and data loaders
+    train_dataset = MRISliceDataset(
+        t1_dir='./processed_dataset/IXI-T1',
+        t2_dir='./processed_dataset/IXI-T2',
+        normalize=True
+    )
+    
+    # Split dataset
+    train_size = int(0.8 * len(train_dataset))
+    val_size = len(train_dataset) - train_size
+    train_dataset, val_dataset = torch.utils.data.random_split(
+        train_dataset, [train_size, val_size]
+    )
+    
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=2
+    )
+    
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=2
+    )
+    
+    # Create model, loss function, and optimizer
+    model = LightweightUNet().to(device)
+    criterion = nn.MSELoss()
+    optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+    
+    # Training loop
+    train_losses = []
+    val_losses = []
+    
+    print(f"Starting training with {len(train_dataset)} training samples and {len(val_dataset)} validation samples")
+    print(f"Results will be saved in: {save_dir}")
+    
+    for epoch in range(num_epochs):
+        print(f"\nEpoch {epoch+1}/{num_epochs}")
+        
+        # Train
+        train_loss = train_epoch(model, train_loader, criterion, optimizer, device)
+        train_losses.append(train_loss)
+        
+        # Validate
+        val_loss = validate(model, val_loader, criterion, device)
+        val_losses.append(val_loss)
+        
+        print(f"Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+        
+        # Visualize results
+        visualize_results(model, val_loader, device, epoch+1, save_dir)
+        
+        # Save checkpoint
+        checkpoint = {
+            'epoch': epoch + 1,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'train_loss': train_loss,
+            'val_loss': val_loss,
+        }
+        torch.save(checkpoint, os.path.join(save_dir, f'checkpoint_epoch_{epoch+1}.pt'))
+    
+    # Plot loss curves
+    plt.figure(figsize=(10, 5))
+    plt.plot(train_losses, label='Training Loss')
+    plt.plot(val_losses, label='Validation Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Training and Validation Loss')
+    plt.legend()
+    plt.savefig(os.path.join(save_dir, 'loss_curves.png'))
+    plt.close()
+
 if __name__ == "__main__":
     main()

@@ -16,7 +16,7 @@ class MonaiRectifiedFlow(nn.Module):
         
         # MONAI UNet as backbone
         self.unet = UNet(
-            dimensions=2,  # 2D UNet
+            spatial_dims=2,  # 2D UNet
             in_channels=in_channels + 1,  # +1 for time channel
             out_channels=out_channels,
             channels=features,
@@ -141,16 +141,15 @@ def train_monai_rectified_flow(model, optimizer, source_loader, target_loader, d
     for epoch in range(epochs):
         epoch_losses = []
         
-        for (source_batch, target_batch) in tqdm(zip(source_loader, target_loader), 
-                                                desc=f"Epoch {epoch+1}/{epochs}",
-                                                total=min(len(source_loader), len(target_loader))):
+        for batch_data in tqdm(source_loader, desc=f"Epoch {epoch+1}/{epochs}"):
+            # Get source and target images from the same batch
+            source_batch, target_batch = batch_data
             
-            source_batch, target_batch = source_batch.to(device), target_batch.to(device)
+            source_batch = source_batch.to(device)
+            target_batch = target_batch.to(device)
             
             # Ensure we have matching batch sizes
-            current_batch_size = min(source_batch.size(0), target_batch.size(0))
-            source_batch = source_batch[:current_batch_size]
-            target_batch = target_batch[:current_batch_size]
+            current_batch_size = source_batch.size(0)
             
             # Sample random timesteps
             t = torch.rand(current_batch_size, device=device)

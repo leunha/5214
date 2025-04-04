@@ -9,9 +9,9 @@ import argparse
 
 class MRISliceDataset(Dataset):
     """
-    Dataset for paired 2D MRI slices (T1 and T2)
+    Dataset for paired 2D MRI slices (T1 and T2), using only middle 30% of slices
     """
-    def __init__(self, t1_dir, t2_dir, transform=None, normalize=True, slice_axis=2):
+    def __init__(self, t1_dir, t2_dir, transform=None, normalize=True, slice_axis=2, target_size=(256, 256), middle_percent=0.3):
         """
         Initialize the dataset.
         
@@ -21,6 +21,8 @@ class MRISliceDataset(Dataset):
             transform: Optional transformations to apply
             normalize: Whether to normalize images to [0, 1]
             slice_axis: Axis to slice along (default: 2 for axial slices)
+            target_size: Target size for all slices (height, width)
+            middle_percent: Percentage of middle slices to use (default: 0.3 for 30%)
         """
         self.t1_files = sorted(glob.glob(os.path.join(t1_dir, "*.npy")))
         self.t2_files = sorted(glob.glob(os.path.join(t2_dir, "*.npy")))
@@ -45,39 +47,47 @@ class MRISliceDataset(Dataset):
         self.transform = transform
         self.normalize = normalize
         self.slice_axis = slice_axis
+        self.target_size = target_size
+        self.middle_percent = middle_percent
         
-        # Load all volumes to get slice counts
-        self.slices_per_volume = []
-        self.total_slices = 0
+        # Create index mapping for efficient slice access
+        self.slice_mapping = []
+        total_slices = 0
         
         for i in range(len(self.t1_files)):
             t1_volume = np.load(self.t1_files[i])
             t2_volume = np.load(self.t2_files[i])
             
-            # Get the minimum slice count between T1 and T2
-            min_slices = min(t1_volume.shape[self.slice_axis], t2_volume.shape[self.slice_axis])
-            self.slices_per_volume.append(min_slices)
-            self.total_slices += min_slices
+            # Get number of slices
+            num_slices = min(t1_volume.shape[self.slice_axis], 
+                           t2_volume.shape[self.slice_axis])
+            
+            # Calculate middle slice range (30% of total)
+            middle_slices = int(num_slices * middle_percent)
+            start_idx = (num_slices - middle_slices) // 2
+            end_idx = start_idx + middle_slices
+            
+            # Store mapping of each slice to its volume
+            for slice_idx in range(start_idx, end_idx):
+                self.slice_mapping.append((i, slice_idx))
+            total_slices += middle_slices
         
-        print(f"Dataset contains {len(self.t1_files)} paired volumes with a total of {self.total_slices} paired slices")
+        print(f"Dataset contains {len(self.t1_files)} paired volumes")
+        print(f"Using middle {middle_percent*100:.1f}% of slices ({total_slices} total slices)")
+        print(f"Average {total_slices/len(self.t1_files):.1f} slices per volume")
     
     def __len__(self):
-        return self.total_slices
+        return len(self.slice_mapping)
     
     def __getitem__(self, idx):
-        # Find which volume and slice this index corresponds to
-        volume_idx = 0
-        slice_idx = idx
-        
-        while slice_idx >= self.slices_per_volume[volume_idx]:
-            slice_idx -= self.slices_per_volume[volume_idx]
-            volume_idx += 1
+        # Get volume and slice indices from mapping
+        volume_idx, slice_idx = self.slice_mapping[idx]
         
         # Load the T1 and T2 volumes
         t1_volume = np.load(self.t1_files[volume_idx])
         t2_volume = np.load(self.t2_files[volume_idx])
         
-        # Extract the slices
+        # Extract the slices based on the axis
         if self.slice_axis == 0:
             t1_slice = t1_volume[slice_idx, :, :]
             t2_slice = t2_volume[slice_idx, :, :]
@@ -88,25 +98,46 @@ class MRISliceDataset(Dataset):
             t1_slice = t1_volume[:, :, slice_idx]
             t2_slice = t2_volume[:, :, slice_idx]
         
-        # Convert to tensors
-        t1_tensor = torch.from_numpy(t1_slice).float().unsqueeze(0)  # Add channel dimension
-        t2_tensor = torch.from_numpy(t2_slice).float().unsqueeze(0)  # Add channel dimension
+        # Ensure slices are 2D
+        t1_slice = np.asarray(t1_slice)
+        t2_slice = np.asarray(t2_slice)
         
-        # Apply optional normalization to [0, 1]
+        # Resize if necessary
+        if t1_slice.shape != self.target_size:
+            t1_slice = torch.nn.functional.interpolate(
+                torch.from_numpy(t1_slice).float().unsqueeze(0).unsqueeze(0),
+                size=self.target_size,
+                mode='bilinear',
+                align_corners=False
+            ).squeeze(0)
+        else:
+            t1_slice = torch.from_numpy(t1_slice).float().unsqueeze(0)
+            
+        if t2_slice.shape != self.target_size:
+            t2_slice = torch.nn.functional.interpolate(
+                torch.from_numpy(t2_slice).float().unsqueeze(0).unsqueeze(0),
+                size=self.target_size,
+                mode='bilinear',
+                align_corners=False
+            ).squeeze(0)
+        else:
+            t2_slice = torch.from_numpy(t2_slice).float().unsqueeze(0)
+        
+        # Apply normalization if requested
         if self.normalize:
-            t1_tensor = (t1_tensor - t1_tensor.min()) / (t1_tensor.max() - t1_tensor.min() + 1e-8)
-            t2_tensor = (t2_tensor - t2_tensor.min()) / (t2_tensor.max() - t2_tensor.min() + 1e-8)
+            t1_slice = (t1_slice - t1_slice.min()) / (t1_slice.max() - t1_slice.min() + 1e-8)
+            t2_slice = (t2_slice - t2_slice.min()) / (t2_slice.max() - t2_slice.min() + 1e-8)
         
-        # Apply transformations if specified
+        # Apply additional transforms if specified
         if self.transform:
-            t1_tensor = self.transform(t1_tensor)
-            t2_tensor = self.transform(t2_tensor)
+            t1_slice = self.transform(t1_slice)
+            t2_slice = self.transform(t2_slice)
         
-        return t1_tensor, t2_tensor
+        return t1_slice.contiguous(), t2_slice.contiguous()
 
-def visualize_dataset_samples(dataset, num_samples=5, figsize=(15, 8)):
+def visualize_dataset_samples(dataset, num_samples=5, figsize=(20, 15)):
     """
-    Visualize random samples from the dataset
+    Visualize random samples from the dataset with enhanced alignment check
     
     Args:
         dataset: MRISliceDataset instance
@@ -115,21 +146,49 @@ def visualize_dataset_samples(dataset, num_samples=5, figsize=(15, 8)):
     """
     indices = np.random.choice(len(dataset), min(num_samples, len(dataset)), replace=False)
     
-    fig, axes = plt.subplots(2, num_samples, figsize=figsize)
+    fig, axes = plt.subplots(4, num_samples, figsize=figsize)
     
     for i, idx in enumerate(indices):
         t1_slice, t2_slice = dataset[idx]
         
-        # Display T1 and T2 slices
-        axes[0, i].imshow(t1_slice.squeeze().numpy(), cmap='gray')
-        axes[0, i].set_title(f"T1 Slice {idx}")
+        # Convert to numpy and normalize for visualization if needed
+        t1_np = t1_slice.squeeze().numpy()
+        t2_np = t2_slice.squeeze().numpy()
+        
+        # Display T1 slice (transposed)
+        axes[0, i].imshow(t1_np, cmap='gray')
+        axes[0, i].set_title(f"T1 Slice (Transposed) {idx}")
         axes[0, i].axis('off')
         
-        axes[1, i].imshow(t2_slice.squeeze().numpy(), cmap='gray')
+        # Display T2 slice
+        axes[1, i].imshow(t2_np, cmap='gray')
         axes[1, i].set_title(f"T2 Slice {idx}")
         axes[1, i].axis('off')
+        
+        # Display overlay of transposed T1 and T2
+        axes[2, i].imshow(t1_np, cmap='gray')
+        axes[2, i].imshow(t2_np, cmap='hot', alpha=0.5)
+        axes[2, i].set_title("T1-T2 Overlay")
+        axes[2, i].axis('off')
+        
+        # Display difference map
+        diff = np.abs(t1_np - t2_np)
+        diff_normalized = (diff - diff.min()) / (diff.max() - diff.min() + 1e-8)
+        axes[3, i].imshow(diff_normalized, cmap='viridis')
+        axes[3, i].set_title("Difference Map")
+        axes[3, i].axis('off')
+    
+    # Add row labels
+    if num_samples > 0:
+        axes[0, 0].set_ylabel("T1 Images", fontsize=12)
+        axes[1, 0].set_ylabel("T2 Images\n(Transposed)", fontsize=12)
+        axes[2, 0].set_ylabel("Overlay", fontsize=12)
+        axes[3, 0].set_ylabel("Difference", fontsize=12)
     
     plt.tight_layout()
+    plt.suptitle("T1-T2 Slice Correspondence Analysis", fontsize=14)
+    plt.subplots_adjust(top=0.92)
+    
     return fig
 
 def create_data_loaders(t1_dir, t2_dir, batch_size=4, train_ratio=0.8, 
@@ -211,4 +270,4 @@ if __name__ == "__main__":
             print("Dataset is empty. Please run process_data.py first.")
     else:
         print(f"Processed data directories not found: {t1_dir} or {t2_dir}")
-        print("Please run process_data.py first.") 
+        print("Please run process_data.py first.")

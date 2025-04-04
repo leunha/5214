@@ -1,0 +1,11 @@
+t1_dir: ./processed_dataset/IXI-T1
+t2_dir: ./processed_dataset/IXI-T2
+features: [32, 64]
+batch_size: 2
+epochs: 1
+learning_rate: 0.0001
+num_workers: 1
+device: cpu
+output_dir: /Users/ottangconnect.ust.hk/5214 finalize/test_fix_visualization/run_20250404_175614
+num_steps: 10
+reflow_steps: 0

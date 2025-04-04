@@ -164,7 +164,7 @@ def plot_alignment_check(t1_volume, t2_volume, subject_id, output_dir):
         
         # Display overlay
         axes[i, 3].imshow(t1_norm, cmap='gray')
-        axes[i, 3].imshow(t2_norm, cmap='hot', alpha=0.5)
+        axes[i, 3].imshow(t2_transposed_norm, cmap='hot', alpha=0.5)
         axes[i, 3].axis('off')
     
     plt.suptitle(f"T1-T2 Alignment Check for Subject {subject_id}", fontsize=16)
