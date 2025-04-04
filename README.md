@@ -25,17 +25,11 @@ Key papers to review include:
 - "Unsupervised MR-to-CT Synthesis using Structure-Constrained CycleGAN" (Wolterink et al., 2017)
 - "Multimodal Brain MRI Translation using Diffusion Models" (Recent work to compare against)
 
-Below is a detailed summary of the implementation plan for processing 2D slices from the IXI dataset to convert T1-weighted MRI scans to T2-weighted scans using a simplified Rectified Flow model with a MONAI U-Net backbone. This summary is structured as a `README.md` file, including all steps, potential problems, and their solutions, tailored to address the user’s query comprehensively.
-
 ---
 
 # Implementation Plan for T1 to T2 MRI Translation using Rectified Flow (2D Slices)
 
-## Overview
-
-This project focuses on translating T1-weighted MRI scans to T2-weighted scans using a simplified Rectified Flow model, leveraging a MONAI U-Net as the backbone. To accommodate computational limitations (e.g., no GPU), the approach processes 2D slices extracted from 3D MRI volumes in the IXI dataset. This `README.md` details the step-by-step implementation, including data acquisition, preprocessing, model setup, training, and evaluation, alongside potential challenges and solutions.
-
----
+#
 
 ## Data Acquisition and Preprocessing
 
@@ -166,6 +160,3 @@ Without proper alignment, the model would learn incorrect relationships between 
 
 ---
 
-## Conclusion
-
-This implementation plan outlines a practical approach to converting T1-weighted MRI scans to T2-weighted scans using 2D slices from the IXI dataset. By leveraging a simplified Rectified Flow model with a MONAI U-Net backbone, and carefully managing preprocessing and training on a CPU, meaningful results are achievable. The detailed steps and proactive solutions to potential problems ensure a robust workflow, even with limited computational resources. For further assistance or refinements, feel free to reach out!
