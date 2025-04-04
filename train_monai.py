@@ -50,7 +50,7 @@ def visualize_results(model, rf, val_loader, epoch, args):
         
         # Create figure
         n_samples = min(4, source.size(0))
-        fig, axes = plt.subplots(3, n_samples, figsize=(4*n_samples, 10))
+        fig, axes = plt.subplots(4, n_samples, figsize=(4*n_samples, 12))
         
         # For each sample
         for i in range(n_samples):
@@ -68,6 +68,19 @@ def visualize_results(model, rf, val_loader, epoch, args):
             axes[2, i].imshow(target[i, 0].cpu().numpy(), cmap='gray')
             axes[2, i].set_title('Target (True T2)')
             axes[2, i].axis('off')
+            
+            # Show overlay of target and generated for alignment check
+            axes[3, i].imshow(target[i, 0].cpu().numpy(), cmap='gray')
+            axes[3, i].imshow(generated[i, 0].cpu().numpy(), cmap='hot', alpha=0.5)
+            axes[3, i].set_title('True/Generated Overlay')
+            axes[3, i].axis('off')
+        
+        # Add row labels
+        if n_samples > 0:
+            axes[0, 0].set_ylabel("Source (T1)", fontsize=12)
+            axes[1, 0].set_ylabel("Generated (T2)", fontsize=12)
+            axes[2, 0].set_ylabel("Target (T2)", fontsize=12)
+            axes[3, 0].set_ylabel("Alignment Check", fontsize=12)
         
         plt.tight_layout()
         plt.savefig(os.path.join(args.output_dir, 'visualizations', f'epoch_{epoch}.png'))
@@ -240,4 +253,4 @@ if __name__ == "__main__":
                        help='Number of reflow steps (0 to disable)')
     
     args = parser.parse_args()
-    main(args) 
+    main(args)

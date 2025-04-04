@@ -54,9 +54,6 @@ class MRISliceDataset(Dataset):
             t1_volume = np.load(self.t1_files[i])
             t2_volume = np.load(self.t2_files[i])
             
-            # Transpose T1 volume
-            t1_volume = np.transpose(t1_volume, (1, 0, 2))
-            
             # Get the minimum slice count between T1 and T2
             min_slices = min(t1_volume.shape[self.slice_axis], t2_volume.shape[self.slice_axis])
             self.slices_per_volume.append(min_slices)
@@ -79,9 +76,6 @@ class MRISliceDataset(Dataset):
         # Load the T1 and T2 volumes
         t1_volume = np.load(self.t1_files[volume_idx])
         t2_volume = np.load(self.t2_files[volume_idx])
-        
-        # Transpose T1 volume
-        t1_volume = np.transpose(t1_volume, (1, 0, 2))
         
         # Extract the slices
         if self.slice_axis == 0:
@@ -110,9 +104,9 @@ class MRISliceDataset(Dataset):
         
         return t1_tensor, t2_tensor
 
-def visualize_dataset_samples(dataset, num_samples=5, figsize=(20, 15)):
+def visualize_dataset_samples(dataset, num_samples=5, figsize=(15, 8)):
     """
-    Visualize random samples from the dataset with enhanced alignment check
+    Visualize random samples from the dataset
     
     Args:
         dataset: MRISliceDataset instance
@@ -121,49 +115,21 @@ def visualize_dataset_samples(dataset, num_samples=5, figsize=(20, 15)):
     """
     indices = np.random.choice(len(dataset), min(num_samples, len(dataset)), replace=False)
     
-    fig, axes = plt.subplots(4, num_samples, figsize=figsize)
+    fig, axes = plt.subplots(2, num_samples, figsize=figsize)
     
     for i, idx in enumerate(indices):
         t1_slice, t2_slice = dataset[idx]
         
-        # Convert to numpy and normalize for visualization if needed
-        t1_np = t1_slice.squeeze().numpy()
-        t2_np = t2_slice.squeeze().numpy()
-        
-        # Display T1 slice (transposed)
-        axes[0, i].imshow(t1_np, cmap='gray')
-        axes[0, i].set_title(f"T1 Slice (Transposed) {idx}")
+        # Display T1 and T2 slices
+        axes[0, i].imshow(t1_slice.squeeze().numpy(), cmap='gray')
+        axes[0, i].set_title(f"T1 Slice {idx}")
         axes[0, i].axis('off')
         
-        # Display T2 slice
-        axes[1, i].imshow(t2_np, cmap='gray')
+        axes[1, i].imshow(t2_slice.squeeze().numpy(), cmap='gray')
         axes[1, i].set_title(f"T2 Slice {idx}")
         axes[1, i].axis('off')
-        
-        # Display overlay of transposed T1 and T2
-        axes[2, i].imshow(t1_np, cmap='gray')
-        axes[2, i].imshow(t2_np, cmap='hot', alpha=0.5)
-        axes[2, i].set_title("T1-T2 Overlay")
-        axes[2, i].axis('off')
-        
-        # Display difference map
-        diff = np.abs(t1_np - t2_np)
-        diff_normalized = (diff - diff.min()) / (diff.max() - diff.min() + 1e-8)
-        axes[3, i].imshow(diff_normalized, cmap='viridis')
-        axes[3, i].set_title("Difference Map")
-        axes[3, i].axis('off')
-    
-    # Add row labels
-    if num_samples > 0:
-        axes[0, 0].set_ylabel("T1 Images", fontsize=12)
-        axes[1, 0].set_ylabel("T2 Images\n(Transposed)", fontsize=12)
-        axes[2, 0].set_ylabel("Overlay", fontsize=12)
-        axes[3, 0].set_ylabel("Difference", fontsize=12)
     
     plt.tight_layout()
-    plt.suptitle("T1-T2 Slice Correspondence Analysis", fontsize=14)
-    plt.subplots_adjust(top=0.92)
-    
     return fig
 
 def create_data_loaders(t1_dir, t2_dir, batch_size=4, train_ratio=0.8, 
@@ -245,4 +211,4 @@ if __name__ == "__main__":
             print("Dataset is empty. Please run process_data.py first.")
     else:
         print(f"Processed data directories not found: {t1_dir} or {t2_dir}")
-        print("Please run process_data.py first.")
+        print("Please run process_data.py first.") 
