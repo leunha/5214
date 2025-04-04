@@ -11,20 +11,21 @@ class MRISliceDataset(Dataset):
     """
     Dataset for paired 2D MRI slices (T1 and T2)
     """
-    def __init__(self, t1_dir, t2_dir, transform=None, normalize=True):
+    def __init__(self, t1_dir, t2_dir, transform=None, normalize=True, slice_axis=2):
         """
         Initialize the dataset.
         
         Args:
-            t1_dir: Directory containing T1 slices
-            t2_dir: Directory containing T2 slices
+            t1_dir: Directory containing T1 volumes
+            t2_dir: Directory containing T2 volumes
             transform: Optional transformations to apply
             normalize: Whether to normalize images to [0, 1]
+            slice_axis: Axis to slice along (default: 2 for axial slices)
         """
         self.t1_files = sorted(glob.glob(os.path.join(t1_dir, "*.npy")))
         self.t2_files = sorted(glob.glob(os.path.join(t2_dir, "*.npy")))
         
-        # Extract slice identifiers
+        # Extract volume identifiers
         self.t1_identifiers = [os.path.basename(f).split('.')[0] for f in self.t1_files]
         self.t2_identifiers = [os.path.basename(f).split('.')[0] for f in self.t2_files]
         
@@ -43,16 +44,55 @@ class MRISliceDataset(Dataset):
         
         self.transform = transform
         self.normalize = normalize
+        self.slice_axis = slice_axis
         
-        print(f"Dataset contains {len(self.t1_files)} paired slices")
+        # Load all volumes to get slice counts
+        self.slices_per_volume = []
+        self.total_slices = 0
+        
+        for i in range(len(self.t1_files)):
+            t1_volume = np.load(self.t1_files[i])
+            t2_volume = np.load(self.t2_files[i])
+            
+            # Transpose T1 volume
+            t1_volume = np.transpose(t1_volume, (1, 0, 2))
+            
+            # Get the minimum slice count between T1 and T2
+            min_slices = min(t1_volume.shape[self.slice_axis], t2_volume.shape[self.slice_axis])
+            self.slices_per_volume.append(min_slices)
+            self.total_slices += min_slices
+        
+        print(f"Dataset contains {len(self.t1_files)} paired volumes with a total of {self.total_slices} paired slices")
     
     def __len__(self):
-        return len(self.t1_files)
+        return self.total_slices
     
     def __getitem__(self, idx):
-        # Load the T1 and T2 slices
-        t1_slice = np.load(self.t1_files[idx])
-        t2_slice = np.load(self.t2_files[idx])
+        # Find which volume and slice this index corresponds to
+        volume_idx = 0
+        slice_idx = idx
+        
+        while slice_idx >= self.slices_per_volume[volume_idx]:
+            slice_idx -= self.slices_per_volume[volume_idx]
+            volume_idx += 1
+        
+        # Load the T1 and T2 volumes
+        t1_volume = np.load(self.t1_files[volume_idx])
+        t2_volume = np.load(self.t2_files[volume_idx])
+        
+        # Transpose T1 volume
+        t1_volume = np.transpose(t1_volume, (1, 0, 2))
+        
+        # Extract the slices
+        if self.slice_axis == 0:
+            t1_slice = t1_volume[slice_idx, :, :]
+            t2_slice = t2_volume[slice_idx, :, :]
+        elif self.slice_axis == 1:
+            t1_slice = t1_volume[:, slice_idx, :]
+            t2_slice = t2_volume[:, slice_idx, :]
+        else:  # self.slice_axis == 2
+            t1_slice = t1_volume[:, :, slice_idx]
+            t2_slice = t2_volume[:, :, slice_idx]
         
         # Convert to tensors
         t1_tensor = torch.from_numpy(t1_slice).float().unsqueeze(0)  # Add channel dimension
@@ -70,9 +110,9 @@ class MRISliceDataset(Dataset):
         
         return t1_tensor, t2_tensor
 
-def visualize_dataset_samples(dataset, num_samples=5, figsize=(15, 8)):
+def visualize_dataset_samples(dataset, num_samples=5, figsize=(20, 15)):
     """
-    Visualize random samples from the dataset
+    Visualize random samples from the dataset with enhanced alignment check
     
     Args:
         dataset: MRISliceDataset instance
@@ -81,21 +121,49 @@ def visualize_dataset_samples(dataset, num_samples=5, figsize=(15, 8)):
     """
     indices = np.random.choice(len(dataset), min(num_samples, len(dataset)), replace=False)
     
-    fig, axes = plt.subplots(2, num_samples, figsize=figsize)
+    fig, axes = plt.subplots(4, num_samples, figsize=figsize)
     
     for i, idx in enumerate(indices):
         t1_slice, t2_slice = dataset[idx]
         
-        # Display T1 and T2 slices
-        axes[0, i].imshow(t1_slice.squeeze(), cmap='gray')
-        axes[0, i].set_title(f"T1 Slice {idx}")
+        # Convert to numpy and normalize for visualization if needed
+        t1_np = t1_slice.squeeze().numpy()
+        t2_np = t2_slice.squeeze().numpy()
+        
+        # Display T1 slice (transposed)
+        axes[0, i].imshow(t1_np, cmap='gray')
+        axes[0, i].set_title(f"T1 Slice (Transposed) {idx}")
         axes[0, i].axis('off')
         
-        axes[1, i].imshow(t2_slice.squeeze(), cmap='gray')
+        # Display T2 slice
+        axes[1, i].imshow(t2_np, cmap='gray')
         axes[1, i].set_title(f"T2 Slice {idx}")
         axes[1, i].axis('off')
+        
+        # Display overlay of transposed T1 and T2
+        axes[2, i].imshow(t1_np, cmap='gray')
+        axes[2, i].imshow(t2_np, cmap='hot', alpha=0.5)
+        axes[2, i].set_title("T1-T2 Overlay")
+        axes[2, i].axis('off')
+        
+        # Display difference map
+        diff = np.abs(t1_np - t2_np)
+        diff_normalized = (diff - diff.min()) / (diff.max() - diff.min() + 1e-8)
+        axes[3, i].imshow(diff_normalized, cmap='viridis')
+        axes[3, i].set_title("Difference Map")
+        axes[3, i].axis('off')
+    
+    # Add row labels
+    if num_samples > 0:
+        axes[0, 0].set_ylabel("T1 Images", fontsize=12)
+        axes[1, 0].set_ylabel("T2 Images\n(Transposed)", fontsize=12)
+        axes[2, 0].set_ylabel("Overlay", fontsize=12)
+        axes[3, 0].set_ylabel("Difference", fontsize=12)
     
     plt.tight_layout()
+    plt.suptitle("T1-T2 Slice Correspondence Analysis", fontsize=14)
+    plt.subplots_adjust(top=0.92)
+    
     return fig
 
 def create_data_loaders(t1_dir, t2_dir, batch_size=4, train_ratio=0.8, 
@@ -148,9 +216,10 @@ def create_data_loaders(t1_dir, t2_dir, batch_size=4, train_ratio=0.8,
 if __name__ == "__main__":
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Test MRI Slice Dataset")
-    parser.add_argument("--t1_dir", type=str, default="./processed_dataset/IXI-T1", help="Directory containing T1 slices")
-    parser.add_argument("--t2_dir", type=str, default="./processed_dataset/IXI-T2", help="Directory containing T2 slices")
+    parser.add_argument("--t1_dir", type=str, default="./processed_dataset/IXI-T1", help="Directory containing T1 volumes")
+    parser.add_argument("--t2_dir", type=str, default="./processed_dataset/IXI-T2", help="Directory containing T2 volumes")
     parser.add_argument("--visualize", action="store_true", help="Generate and save visualization")
+    parser.add_argument("--slice_axis", type=int, default=2, help="Axis to extract slices from (0, 1, or 2)")
     args = parser.parse_args()
     
     t1_dir = args.t1_dir
@@ -159,20 +228,21 @@ if __name__ == "__main__":
     # Simple test to ensure the dataset works correctly
     if os.path.exists(t1_dir) and os.path.exists(t2_dir):
         # Create dataset
-        dataset = MRISliceDataset(t1_dir, t2_dir)
+        dataset = MRISliceDataset(t1_dir, t2_dir, slice_axis=args.slice_axis)
         
         # Test loading a sample
         if len(dataset) > 0:
             t1_slice, t2_slice = dataset[0]
-            print(f"T1 shape: {t1_slice.shape}, T2 shape: {t2_slice.shape}")
+            print(f"T1 slice shape: {t1_slice.shape}, T2 slice shape: {t2_slice.shape}")
             
             # Visualize samples
-            fig = visualize_dataset_samples(dataset)
-            os.makedirs("./visualizations", exist_ok=True)
-            fig.savefig("./visualizations/dataset_samples.png")
-            print(f"Saved sample visualization to ./visualizations/dataset_samples.png")
+            if args.visualize:
+                fig = visualize_dataset_samples(dataset)
+                os.makedirs("./visualizations", exist_ok=True)
+                fig.savefig("./visualizations/dataset_samples.png")
+                print(f"Saved sample visualization to ./visualizations/dataset_samples.png")
         else:
             print("Dataset is empty. Please run process_data.py first.")
     else:
         print(f"Processed data directories not found: {t1_dir} or {t2_dir}")
-        print("Please run process_data.py first.") 
+        print("Please run process_data.py first.")
