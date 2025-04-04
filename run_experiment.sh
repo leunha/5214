@@ -18,9 +18,8 @@ echo "Step 1: Downloading IXI dataset..."
 python download_data.py
 
 # Step 2: Process the data
-echo "Step 2: Processing downloaded data..."
-mkdir -p ./processed_dataset/IXI-T1 ./processed_dataset/IXI-T2
-python process_data.py
+python process_data.py --t1_dir ./IXI-T1 --t2_dir "./IXI-T2 2" --output_dir ./processed_dataset --no_registration
+python 2d-dataset.py --t1_dir ./processed_dataset/IXI-T1 --t2_dir ./processed_dataset/IXI-T2 --visualize
 
 # Step 3: Train the model with 
 echo "Step 3: Training Rectified Flow model (CPU-optimized)..."
