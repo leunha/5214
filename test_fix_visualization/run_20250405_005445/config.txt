@@ -1,0 +1,11 @@
+t1_dir: .\processed_dataset\IXI-T1-full
+t2_dir: .\processed_dataset\IXI-T2-full
+features: [32, 64, 128, 256]
+batch_size: 64
+epochs: 1
+learning_rate: 0.0001
+num_workers: 1
+device: cuda
+output_dir: C:\Users\erast\Documents\5214\test_fix_visualization\run_20250405_005445
+num_steps: 100
+reflow_steps: 0

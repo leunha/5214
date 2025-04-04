@@ -107,12 +107,12 @@ def visualize_results(model, rf, val_loader, epoch, args):
         plt.savefig(os.path.join(args.output_dir, 'visualizations', f'trajectory_epoch_{epoch}.png'))
         plt.close()
 
-def train_monai_rectified_flow(model, optimizer, source_loader, target_loader, device, epochs, output_dir):
+def train_monai_rectified_flow(rf, optimizer, source_loader, target_loader, device, epochs, output_dir):
     """
     Train the Rectified Flow model.
     
     Args:
-        model: MonaiRectifiedFlow model
+        rf: RectifiedFlowODE model
         optimizer: Optimizer
         source_loader: DataLoader for source domain (T1)
         target_loader: DataLoader for target domain (T2)
@@ -124,9 +124,8 @@ def train_monai_rectified_flow(model, optimizer, source_loader, target_loader, d
         model: Trained model
         loss_curve: Training loss history
     """
-    model.train()
+    rf.model.train()
     loss_curve = []
-    rf = RectifiedFlowODE(model, num_steps=20)  # Create RectifiedFlowODE instance for visualization
     
     for epoch in range(epochs):
         epoch_losses = []
@@ -148,7 +147,7 @@ def train_monai_rectified_flow(model, optimizer, source_loader, target_loader, d
             z_t = source_batch * (1-t.view(-1,1,1,1)) + target_batch * t.view(-1,1,1,1)
             
             # Compute model prediction
-            pred = model(z_t, t)
+            pred = rf.model(z_t, t)
             
             # Compute loss (target - source is ground truth for rectified flow)
             loss = F.mse_loss(pred, target_batch - source_batch)
@@ -169,7 +168,7 @@ def train_monai_rectified_flow(model, optimizer, source_loader, target_loader, d
         try:
             torch.save({
                 'epoch': epoch + 1,
-                'model_state_dict': model.state_dict(),
+                'model_state_dict': rf.model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': avg_loss,
             }, checkpoint_path)
@@ -179,7 +178,7 @@ def train_monai_rectified_flow(model, optimizer, source_loader, target_loader, d
         
         # Generate and save visualizations
         try:
-            model.eval()
+            rf.model.eval()
             with torch.no_grad():
                 # Get validation batch
                 val_batch = next(iter(target_loader))
@@ -197,15 +196,15 @@ def train_monai_rectified_flow(model, optimizer, source_loader, target_loader, d
                 # Create a namespace with both output_dir and device attributes
                 args_namespace = argparse.Namespace(output_dir=output_dir, device=device, num_steps=20)
                 
-                visualize_results(model, rf, target_loader, epoch + 1, args_namespace)
+                visualize_results(rf.model, rf, target_loader, epoch + 1, args_namespace)
                 print(f"Saved visualization to {vis_path}")
-            model.train()
+            rf.model.train()
         except Exception as e:
             print(f"Error generating visualization: {str(e)}")
             import traceback
             traceback.print_exc()  # Print full error traceback
     
-    return model, loss_curve
+    return rf, loss_curve
 
 def main(args):
     # Set device
@@ -250,6 +249,12 @@ def main(args):
     sample_batch = next(iter(train_loader))
     source_batch, target_batch = sample_batch
     print(f"Source shape: {source_batch.shape}, Target shape: {target_batch.shape}")
+    # sample_t1 = source_batch[0, 0].cpu().numpy()
+    # sample_t2 = target_batch[0, 0].cpu().numpy()
+    # plt.imshow(sample_t1, cmap='gray')
+    # plt.show()
+    # plt.imshow(sample_t2, cmap='gray')
+    # plt.show()
     
     # Create model
     model = MonaiRectifiedFlow(
@@ -258,6 +263,8 @@ def main(args):
         out_channels=1,
         features=args.features
     ).to(args.device)
+
+    rf = RectifiedFlowODE(model, num_steps=20)  # Create RectifiedFlowODE instance for visualization
     
     # Print model summary
     print(f"Model created with {sum(p.numel() for p in model.parameters()):,} parameters")
@@ -268,8 +275,8 @@ def main(args):
     # Train the model
     start_time = time.time()
     
-    model, loss_curve = train_monai_rectified_flow(
-        model, 
+    rf, loss_curve = train_monai_rectified_flow(
+        rf, 
         optimizer, 
         train_loader, 
         train_loader,  # Use same loader for source and target
@@ -295,7 +302,7 @@ def main(args):
     final_model_path = os.path.join(args.output_dir, 'final_model.pt')
     try:
         torch.save({
-            'model_state_dict': model.state_dict(),
+            'model_state_dict': rf.model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'args': vars(args),
             'loss_curve': loss_curve
@@ -325,7 +332,7 @@ def main(args):
         # Save reflowed model
         reflowed_model_path = os.path.join(args.output_dir, 'reflowed_model.pt')
         torch.save({
-            'model_state_dict': model.state_dict(),
+            'model_state_dict': rf.model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'args': vars(args),
             'reflow_steps': args.reflow_steps
@@ -334,7 +341,7 @@ def main(args):
         print(f"Reflowed model saved to {reflowed_model_path}")
         
         # Visualize results after reflow
-        visualize_results(model, rf, val_loader, args.epochs + 1, args)
+        visualize_results(rf.model, rf, val_loader, args.epochs + 1, args)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train MONAI-based Rectified Flow for MRI Translation')

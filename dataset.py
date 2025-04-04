@@ -57,6 +57,9 @@ class MRISliceDataset(Dataset):
         for i in range(len(self.t1_files)):
             t1_volume = np.load(self.t1_files[i])
             t2_volume = np.load(self.t2_files[i])
+
+            # Transpose T1 volume
+            # t1_volume = np.transpose(t1_volume, (1, 0, 2))
             
             # Get number of slices
             num_slices = min(t1_volume.shape[self.slice_axis], 
@@ -86,6 +89,10 @@ class MRISliceDataset(Dataset):
         # Load the T1 and T2 volumes
         t1_volume = np.load(self.t1_files[volume_idx])
         t2_volume = np.load(self.t2_files[volume_idx])
+
+        # Transpose T1 volume
+        t1_volume = np.transpose(t1_volume, (1, 0, 2))
+        
         
         # Extract the slices based on the axis
         if self.slice_axis == 0:

@@ -3,3 +3,5 @@
 /processed_dataset
 /IXI-T1
 /IXI-T2 2
+*.pt
+/env
