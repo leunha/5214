@@ -22,8 +22,7 @@ python 2d-dataset.py --t1_dir .\processed_dataset\IXI-T1 --t2_dir .\processed_da
 
 REM Step 3: Train the model
 echo Step 3: Training Rectified Flow model (CPU-optimized)...
-python train_monai.py --t1_dir .\processed_dataset\IXI-T1-full --t2_dir .\processed_dataset\IXI-T2-full --batch_size 64 --epochs 20 --num_steps 100 --features 64 128 256 256 --output_dir .\test_fix_visualization --num_workers 1 --reflow_steps 0
-
+python train_monai.py --t1_dir ./processed_dataset/IXI-T1 --t2_dir ./processed_dataset/IXI-T2 --batch_size 2 --epochs 5 --num_steps 20 --features 32 64 128 --reflow_steps 3 --use_combined_loss
 REM option 2: another model
 python efficient_pretrained_flow.py --t1_dir ./processed_dataset/IXI-T1 --t2_dir ./processed_dataset/IXI-T2 --epochs 1 --batch_size 2 --freeze_ratio 0.95 --output_dir ./quick_pretrained_results
 

@@ -4,6 +4,77 @@ import torch.nn.functional as F
 from monai.networks.nets import UNet
 from monai.networks.layers import Norm
 from tqdm import tqdm
+import numpy as np
+import os
+
+# Add SSIM implementation
+class SSIM(nn.Module):
+    """Layer to compute the SSIM loss between a pair of images"""
+    def __init__(self, win_size=11, k1=0.01, k2=0.03):
+        """
+        Args:
+            win_size: Window size for SSIM calculation
+            k1, k2: SSIM parameters
+        """
+        super(SSIM, self).__init__()
+        self.win_size = win_size
+        self.k1, self.k2 = k1, k2
+        self.register_buffer('w', self._create_window(win_size))
+        self.cov_norm = win_size * win_size
+
+    def _create_window(self, win_size):
+        # Create a 2D Gaussian window
+        gauss = torch.Tensor([np.exp(-(x - win_size//2)**2/float(win_size)) for x in range(win_size)])
+        gauss = gauss / gauss.sum()
+        _1D_window = gauss.unsqueeze(1)
+        _2D_window = _1D_window.mm(_1D_window.t()).float().unsqueeze(0).unsqueeze(0)
+        return _2D_window
+    
+    def forward(self, x, y):
+        """
+        Calculate SSIM between x and y
+        Args:
+            x, y: Images to compare (B, C, H, W)
+        Returns:
+            SSIM value (higher is better, range: [0,1])
+        """
+        # Check size
+        assert x.shape == y.shape, f"Input images must have the same dimensions: {x.shape} vs {y.shape}"
+        
+        # Add batch and channel dimensions if needed
+        if len(x.shape) == 2:
+            x = x.unsqueeze(0).unsqueeze(0)
+            y = y.unsqueeze(0).unsqueeze(0)
+        elif len(x.shape) == 3:
+            x = x.unsqueeze(1)
+            y = y.unsqueeze(1)
+            
+        # Calculate means
+        w = self.w.expand(x.shape[1], -1, -1, -1)
+        
+        # Compute means
+        mu_x = F.conv2d(x, w, padding=self.win_size//2, groups=x.shape[1])
+        mu_y = F.conv2d(y, w, padding=self.win_size//2, groups=y.shape[1])
+        
+        # Compute variances and covariance
+        mu_x_sq = mu_x.pow(2)
+        mu_y_sq = mu_y.pow(2)
+        mu_xy = mu_x * mu_y
+        
+        sigma_x_sq = F.conv2d(x * x, w, padding=self.win_size//2, groups=x.shape[1]) - mu_x_sq
+        sigma_y_sq = F.conv2d(y * y, w, padding=self.win_size//2, groups=y.shape[1]) - mu_y_sq
+        sigma_xy = F.conv2d(x * y, w, padding=self.win_size//2, groups=x.shape[1]) - mu_xy
+        
+        # SSIM constants
+        C1 = (self.k1 * 1.0) ** 2
+        C2 = (self.k2 * 1.0) ** 2
+        
+        # Calculate SSIM
+        ssim_map = ((2 * mu_xy + C1) * (2 * sigma_xy + C2)) / \
+                  ((mu_x_sq + mu_y_sq + C1) * (sigma_x_sq + sigma_y_sq + C2))
+        
+        # Return mean SSIM
+        return ssim_map.mean()
 
 class MonaiRectifiedFlow(nn.Module):
     """
@@ -49,6 +120,7 @@ class RectifiedFlowODE:
         """
         self.model = model
         self.num_steps = num_steps
+        self.ssim = SSIM()
     
     def sample_ode(self, z0, N=None):
         """
@@ -119,27 +191,85 @@ class RectifiedFlowODE:
         
         return self
 
-def train_monai_rectified_flow(model, optimizer, source_loader, target_loader, device, epochs):
+def calculate_combined_loss(pred_velocity, source, target, t, ssim_calculator=None, rf_weight=1.0, l1_weight=0.5, ssim_weight=0.5):
+    """
+    Calculate combined loss for Rectified Flow MRI translation
+    
+    Args:
+        pred_velocity: Predicted velocity field
+        source: Source image (T1)
+        target: Target image (T2)
+        t: Current timestep
+        ssim_calculator: SSIM loss calculator
+        rf_weight: Weight for Rectified Flow loss
+        l1_weight: Weight for L1 loss 
+        ssim_weight: Weight for SSIM loss
+        
+    Returns:
+        total_loss: Combined weighted loss
+        loss_dict: Dictionary of individual losses
+    """
+    # Create SSIM calculator if not provided
+    if ssim_calculator is None:
+        ssim_calculator = SSIM().to(pred_velocity.device)
+    
+    # 1. Rectified Flow Loss (velocity matching)
+    target_velocity = target - source  # Straight-line path target
+    rf_loss = F.mse_loss(pred_velocity, target_velocity)
+    
+    # 2. Predicted T2 estimation using the predicted velocity
+    # This is a simplification; during training we interpolate but here we approximate
+    pred_t2 = source + pred_velocity  # Simple addition as approximation
+    
+    # 3. L1 Loss (pixel-level difference)
+    l1_loss = F.l1_loss(pred_t2, target)
+    
+    # 4. SSIM Loss (structural similarity)
+    ssim_value = ssim_calculator(pred_t2, target)
+    ssim_loss = 1.0 - ssim_value  # Convert to loss (1 - SSIM)
+    
+    # Combine losses with weights
+    total_loss = rf_weight * rf_loss + l1_weight * l1_loss + ssim_weight * ssim_loss
+    
+    # Return loss breakdown for logging
+    loss_dict = {
+        'total': total_loss.item(),
+        'rf': rf_loss.item(),
+        'l1': l1_loss.item(),
+        'ssim': ssim_loss.item(),
+        'ssim_value': ssim_value.item()
+    }
+    
+    return total_loss, loss_dict
+
+def train_monai_rectified_flow(rf, optimizer, source_loader, target_loader, device, epochs, output_dir=None, use_combined_loss=True):
     """
     Train the Rectified Flow model.
     
     Args:
-        model: MonaiRectifiedFlow model
+        rf: RectifiedFlowODE model
         optimizer: Optimizer
         source_loader: DataLoader for source domain (T1)
         target_loader: DataLoader for target domain (T2)
         device: Device for training
         epochs: Number of epochs
+        output_dir: Directory to save checkpoints
+        use_combined_loss: Whether to use the combined loss function
         
     Returns:
         model: Trained model
         loss_curve: Training loss history
     """
-    model.train()
+    rf.model.train()
     loss_curve = []
+    
+    # Create SSIM calculator for the combined loss
+    ssim_calculator = SSIM().to(device)
     
     for epoch in range(epochs):
         epoch_losses = []
+        epoch_loss_breakdown = {'rf': 0.0, 'l1': 0.0, 'ssim': 0.0, 'ssim_value': 0.0}
+        num_batches = 0
         
         for batch_data in tqdm(source_loader, desc=f"Epoch {epoch+1}/{epochs}"):
             # Get source and target images from the same batch
@@ -158,10 +288,22 @@ def train_monai_rectified_flow(model, optimizer, source_loader, target_loader, d
             z_t = source_batch * (1-t.view(-1,1,1,1)) + target_batch * t.view(-1,1,1,1)
             
             # Compute model prediction
-            pred = model(z_t, t)
+            pred = rf.model(z_t, t)
             
-            # Compute loss (target - source is ground truth for rectified flow)
-            loss = F.mse_loss(pred, target_batch - source_batch)
+            # Compute loss with standard or combined approach
+            if use_combined_loss:
+                loss, loss_dict = calculate_combined_loss(
+                    pred, source_batch, target_batch, t, 
+                    ssim_calculator=ssim_calculator
+                )
+                
+                # Update loss breakdown for logging
+                for k, v in loss_dict.items():
+                    if k != 'total':
+                        epoch_loss_breakdown[k] += v
+            else:
+                # Original MSE loss
+                loss = F.mse_loss(pred, target_batch - source_batch)
             
             # Update model
             optimizer.zero_grad()
@@ -169,12 +311,37 @@ def train_monai_rectified_flow(model, optimizer, source_loader, target_loader, d
             optimizer.step()
             
             epoch_losses.append(loss.item())
+            num_batches += 1
         
+        # Calculate average loss for the epoch
         avg_loss = sum(epoch_losses) / len(epoch_losses)
         loss_curve.append(avg_loss)
-        print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.6f}")
+        
+        # Print loss breakdown if using combined loss
+        if use_combined_loss and num_batches > 0:
+            print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.6f}")
+            print(f"  RF Loss: {epoch_loss_breakdown['rf']/num_batches:.6f}, " +
+                  f"L1 Loss: {epoch_loss_breakdown['l1']/num_batches:.6f}, " +
+                  f"SSIM Loss: {epoch_loss_breakdown['ssim']/num_batches:.6f}, " +
+                  f"SSIM Value: {1-epoch_loss_breakdown['ssim_value']/num_batches:.4f}")
+        else:
+            print(f"Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.6f}")
+        
+        # Save checkpoint if output directory is provided
+        if output_dir is not None:
+            checkpoint_path = os.path.join(output_dir, f'checkpoint_epoch_{epoch+1}.pt')
+            try:
+                torch.save({
+                    'epoch': epoch + 1,
+                    'model_state_dict': rf.model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': avg_loss,
+                }, checkpoint_path)
+                print(f"Saved checkpoint to {checkpoint_path}")
+            except Exception as e:
+                print(f"Error saving checkpoint: {str(e)}")
     
-    return model, loss_curve
+    return rf, loss_curve
 
 if __name__ == "__main__":
     # Simple test to ensure the model works
@@ -193,4 +360,9 @@ if __name__ == "__main__":
     rf = RectifiedFlowODE(model, num_steps=10)
     trajectories = rf.sample_ode(x)
     print(f"Number of trajectory steps: {len(trajectories)}")
-    print(f"First trajectory shape: {trajectories[0].shape}, Last trajectory shape: {trajectories[-1].shape}") 
+    print(f"First trajectory shape: {trajectories[0].shape}, Last trajectory shape: {trajectories[-1].shape}")
+    
+    # Test loss function
+    target = torch.randn(2, 1, 256, 256).to(device)
+    combined_loss, loss_dict = calculate_combined_loss(output, x, target, t)
+    print(f"Combined loss: {combined_loss.item()}, RF: {loss_dict['rf']}, L1: {loss_dict['l1']}, SSIM: {loss_dict['ssim']}") 

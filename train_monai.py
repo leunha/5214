@@ -107,7 +107,7 @@ def visualize_results(model, rf, val_loader, epoch, args):
         plt.savefig(os.path.join(args.output_dir, 'visualizations', f'trajectory_epoch_{epoch}.png'))
         plt.close()
 
-def train_monai_rectified_flow(rf, optimizer, source_loader, target_loader, device, epochs, output_dir):
+def train_monai_rectified_flow(rf, optimizer, source_loader, target_loader, device, epochs, output_dir, use_combined_loss=False, rf_weight=1.0, l1_weight=0.5, ssim_weight=0.5):
     """
     Train the Rectified Flow model.
     
@@ -119,6 +119,10 @@ def train_monai_rectified_flow(rf, optimizer, source_loader, target_loader, devi
         device: Device for training
         epochs: Number of epochs
         output_dir: Directory to save checkpoints and visualizations
+        use_combined_loss: Whether to use combined loss
+        rf_weight: Weight for Rectified Flow loss
+        l1_weight: Weight for L1 loss
+        ssim_weight: Weight for SSIM loss
         
     Returns:
         model: Trained model
@@ -264,7 +268,7 @@ def main(args):
         features=args.features
     ).to(args.device)
 
-    rf = RectifiedFlowODE(model, num_steps=20)  # Create RectifiedFlowODE instance for visualization
+    rf = RectifiedFlowODE(model, num_steps=args.num_steps)  # Create RectifiedFlowODE instance for visualization
     
     # Print model summary
     print(f"Model created with {sum(p.numel() for p in model.parameters()):,} parameters")
@@ -275,6 +279,7 @@ def main(args):
     # Train the model
     start_time = time.time()
     
+    # Use combined loss if specified
     rf, loss_curve = train_monai_rectified_flow(
         rf, 
         optimizer, 
@@ -282,7 +287,11 @@ def main(args):
         train_loader,  # Use same loader for source and target
         args.device, 
         args.epochs,
-        args.output_dir
+        args.output_dir,
+        use_combined_loss=args.use_combined_loss,
+        rf_weight=args.rf_weight,
+        l1_weight=args.l1_weight,
+        ssim_weight=args.ssim_weight
     )
     
     total_time = time.time() - start_time
@@ -310,6 +319,7 @@ def main(args):
         print(f"Saved final model to {final_model_path}")
     except Exception as e:
         print(f"Error saving final model: {str(e)}")
+        import traceback
         traceback.print_exc()
     
     # Optionally apply reflow procedure for better one-step generation
@@ -366,6 +376,12 @@ if __name__ == "__main__":
     parser.add_argument('--num_steps', type=int, default=50, help='Number of steps for ODE solution')
     parser.add_argument('--reflow_steps', type=int, default=100, 
                        help='Number of reflow steps (0 to disable)')
+    
+    # Loss function arguments
+    parser.add_argument('--use_combined_loss', action='store_true', help='Use combined loss (RF + L1 + SSIM)')
+    parser.add_argument('--rf_weight', type=float, default=1.0, help='Weight for Rectified Flow loss')
+    parser.add_argument('--l1_weight', type=float, default=0.5, help='Weight for L1 loss')
+    parser.add_argument('--ssim_weight', type=float, default=0.5, help='Weight for SSIM loss')
     
     args = parser.parse_args()
     main(args)
