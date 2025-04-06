@@ -374,7 +374,7 @@ if __name__ == "__main__":
     
     # Rectified Flow arguments
     parser.add_argument('--num_steps', type=int, default=50, help='Number of steps for ODE solution')
-    parser.add_argument('--reflow_steps', type=int, default=100, 
+    parser.add_argument('--reflow_steps', type=int, default=1, 
                        help='Number of reflow steps (0 to disable)')
     
     # Loss function arguments
@@ -385,3 +385,4 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     main(args)
+    #python train_monai.py --t1_dir ./processed_dataset/IXI-T1 --t2_dir ./processed_dataset/IXI-T2 --batch_size 2 --epochs 2 --num_steps 10 --features 32 64 128 --reflow_steps 1 --use_combined_loss
