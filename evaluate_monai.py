@@ -6,11 +6,12 @@ import matplotlib.pyplot as plt
 from skimage.metrics import structural_similarity as ssim
 from skimage.metrics import peak_signal_noise_ratio as psnr
 import pandas as pd
+import json
 from tqdm import tqdm
 import time
 from monai.metrics import MAEMetric, MSEMetric
 
-from dataset import MRISliceDataset, create_data_loaders
+from dataset import MRISliceDataset, create_data_loaders, load_existing_split
 from monai_rectified_flow import MonaiRectifiedFlow, RectifiedFlowODE
 
 def calculate_metrics(source, generated, target):
@@ -271,13 +272,28 @@ def main(args):
         for arg, value in vars(args).items():
             f.write(f"{arg}: {value}\n")
     
-    # Create dataset
-    test_dataset = MRISliceDataset(args.t1_dir, args.t2_dir)
-    
-    # Use a subset for testing if specified
-    if args.test_subset > 0 and args.test_subset < len(test_dataset):
-        indices = np.random.choice(len(test_dataset), args.test_subset, replace=False)
-        test_dataset = torch.utils.data.Subset(test_dataset, indices)
+    # Check if we should use a specific split file
+    if args.split_file and os.path.exists(args.split_file):
+        print(f"Loading test set from split file: {args.split_file}")
+        # Create the full dataset
+        full_dataset = MRISliceDataset(args.t1_dir, args.t2_dir)
+        
+        # Load the existing split but only use the test set
+        _, _, test_dataset = load_existing_split(full_dataset, args.split_file)
+        
+        print(f"Using dedicated test set with {len(test_dataset)} samples")
+    else:
+        print("No valid split file specified, creating dataset from scratch")
+        # Create dataset
+        test_dataset = MRISliceDataset(args.t1_dir, args.t2_dir)
+        
+        # Use a subset for testing if specified
+        if args.test_subset > 0 and args.test_subset < len(test_dataset):
+            print(f"WARNING: Randomly sampling {args.test_subset} images for testing.")
+            print("This approach may include images seen during training and is not recommended.")
+            print("Use the --split_file option to use a proper train/val/test split.")
+            indices = np.random.choice(len(test_dataset), args.test_subset, replace=False)
+            test_dataset = torch.utils.data.Subset(test_dataset, indices)
     
     test_loader = torch.utils.data.DataLoader(
         test_dataset,
@@ -413,8 +429,14 @@ if __name__ == "__main__":
     parser.add_argument('--device', type=str, default=None, help='Device to use (cuda or cpu)')
     parser.add_argument('--output_dir', type=str, default='./evaluation_results', help='Directory to save results')
     parser.add_argument('--num_steps', type=int, default=50, help='Number of steps for ODE solution')
-    parser.add_argument('--test_subset', type=int, default=0, help='Number of samples to test (0 = all)')
+    
+    # Dataset arguments - legacy support
+    parser.add_argument('--test_subset', type=int, default=0, help='Number of samples to test (legacy, use --split_file instead)')
     parser.add_argument('--max_test_batches', type=int, default=None, help='Maximum number of batches to test')
+    
+    # New split file argument
+    parser.add_argument('--split_file', type=str, default='./dataset_splits/dataset_split.json', 
+                        help='Path to dataset split JSON file (to use the dedicated test set)')
     
     args = parser.parse_args()
     main(args) 
