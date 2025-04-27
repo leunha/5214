@@ -6,6 +6,8 @@ from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 from torchvision import transforms
 import argparse
+import json
+from pathlib import Path
 
 class MRISliceDataset(Dataset):
     """
@@ -198,33 +200,138 @@ def visualize_dataset_samples(dataset, num_samples=5, figsize=(20, 15)):
     
     return fig
 
-def create_data_loaders(t1_dir, t2_dir, batch_size=4, train_ratio=0.8, 
-                       normalize=True, num_workers=4, transform=None):
+def split_dataset(dataset, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15, 
+                  random_seed=42, save_dir="./dataset_splits"):
     """
-    Create train and validation data loaders
+    Split dataset into train, validation and test sets
+    
+    Args:
+        dataset: Dataset instance
+        train_ratio: Ratio for training set
+        val_ratio: Ratio for validation set  
+        test_ratio: Ratio for test set
+        random_seed: Random seed for reproducibility
+        save_dir: Directory to save the split indices
+        
+    Returns:
+        train_dataset, val_dataset, test_dataset
+    """
+    # Ensure ratios sum to 1
+    assert abs(train_ratio + val_ratio + test_ratio - 1.0) < 1e-5, "Ratios must sum to 1"
+    
+    # Set random seed for reproducibility
+    np.random.seed(random_seed)
+    
+    # Get total size and calculate split sizes
+    total_size = len(dataset)
+    train_size = int(train_ratio * total_size)
+    val_size = int(val_ratio * total_size)
+    test_size = total_size - train_size - val_size
+    
+    # Create random indices
+    indices = np.random.permutation(total_size)
+    
+    # Split indices
+    train_indices = indices[:train_size]
+    val_indices = indices[train_size:train_size + val_size]
+    test_indices = indices[train_size + val_size:]
+    
+    # Create directory to save indices
+    os.makedirs(save_dir, exist_ok=True)
+    
+    # Save indices for reproducibility
+    split_info = {
+        'train_indices': train_indices.tolist(),
+        'val_indices': val_indices.tolist(),
+        'test_indices': test_indices.tolist(),
+        'train_ratio': train_ratio,
+        'val_ratio': val_ratio,
+        'test_ratio': test_ratio,
+        'random_seed': random_seed,
+        'total_size': total_size
+    }
+    
+    with open(os.path.join(save_dir, 'dataset_split.json'), 'w') as f:
+        json.dump(split_info, f)
+    
+    # Create subsets
+    train_dataset = torch.utils.data.Subset(dataset, train_indices)
+    val_dataset = torch.utils.data.Subset(dataset, val_indices)
+    test_dataset = torch.utils.data.Subset(dataset, test_indices)
+    
+    print(f"Dataset split: {len(train_dataset)} training, {len(val_dataset)} validation, {len(test_dataset)} test samples")
+    print(f"Split indices saved to {os.path.join(save_dir, 'dataset_split.json')}")
+    
+    return train_dataset, val_dataset, test_dataset
+
+def load_existing_split(dataset, split_file):
+    """
+    Load existing dataset split from a file
+    
+    Args:
+        dataset: Dataset instance
+        split_file: Path to the split JSON file
+        
+    Returns:
+        train_dataset, val_dataset, test_dataset
+    """
+    if not os.path.exists(split_file):
+        raise FileNotFoundError(f"Split file not found: {split_file}")
+    
+    with open(split_file, 'r') as f:
+        split_info = json.load(f)
+    
+    train_indices = split_info['train_indices']
+    val_indices = split_info['val_indices']
+    test_indices = split_info['test_indices']
+    
+    train_dataset = torch.utils.data.Subset(dataset, train_indices)
+    val_dataset = torch.utils.data.Subset(dataset, val_indices)
+    test_dataset = torch.utils.data.Subset(dataset, test_indices)
+    
+    print(f"Loaded dataset split: {len(train_dataset)} training, {len(val_dataset)} validation, {len(test_dataset)} test samples")
+    return train_dataset, val_dataset, test_dataset
+
+def create_data_loaders(t1_dir, t2_dir, batch_size=4, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15,
+                       normalize=True, num_workers=4, transform=None, random_seed=42,
+                       split_dir="./dataset_splits", use_existing_split=False):
+    """
+    Create train, validation, and test data loaders with proper splitting
     
     Args:
         t1_dir: Directory containing T1 slices
         t2_dir: Directory containing T2 slices
         batch_size: Batch size
-        train_ratio: Ratio of data to use for training
+        train_ratio: Ratio for training set
+        val_ratio: Ratio for validation set
+        test_ratio: Ratio for test set
         normalize: Whether to normalize images
         num_workers: Number of workers for data loading
         transform: Optional transformations to apply
+        random_seed: Random seed for reproducibility
+        split_dir: Directory to save/load split information
+        use_existing_split: Whether to use existing split if available
         
     Returns:
-        train_loader, val_loader
+        train_loader, val_loader, test_loader
     """
     # Create dataset
     dataset = MRISliceDataset(t1_dir, t2_dir, transform=transform, normalize=normalize)
     
-    # Split into train and validation sets
-    train_size = int(train_ratio * len(dataset))
-    val_size = len(dataset) - train_size
-    
-    train_dataset, val_dataset = torch.utils.data.random_split(
-        dataset, [train_size, val_size]
-    )
+    # Check if we should use existing split
+    split_file = os.path.join(split_dir, 'dataset_split.json')
+    if use_existing_split and os.path.exists(split_file):
+        train_dataset, val_dataset, test_dataset = load_existing_split(dataset, split_file)
+    else:
+        # Create a new split
+        train_dataset, val_dataset, test_dataset = split_dataset(
+            dataset, 
+            train_ratio=train_ratio, 
+            val_ratio=val_ratio, 
+            test_ratio=test_ratio,
+            random_seed=random_seed,
+            save_dir=split_dir
+        )
     
     # Create data loaders
     train_loader = DataLoader(
@@ -243,7 +350,15 @@ def create_data_loaders(t1_dir, t2_dir, batch_size=4, train_ratio=0.8,
         pin_memory=True
     )
     
-    return train_loader, val_loader
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=num_workers,
+        pin_memory=True
+    )
+    
+    return train_loader, val_loader, test_loader
 
 if __name__ == "__main__":
     # Parse command line arguments
@@ -252,6 +367,12 @@ if __name__ == "__main__":
     parser.add_argument("--t2_dir", type=str, default="./processed_dataset/IXI-T2", help="Directory containing T2 volumes")
     parser.add_argument("--visualize", action="store_true", help="Generate and save visualization")
     parser.add_argument("--slice_axis", type=int, default=2, help="Axis to extract slices from (0, 1, or 2)")
+    parser.add_argument("--create_splits", action="store_true", help="Create and save train/val/test splits")
+    parser.add_argument("--split_dir", type=str, default="./dataset_splits", help="Directory to save split information")
+    parser.add_argument("--train_ratio", type=float, default=0.7, help="Ratio of data for training")
+    parser.add_argument("--val_ratio", type=float, default=0.15, help="Ratio of data for validation")
+    parser.add_argument("--test_ratio", type=float, default=0.15, help="Ratio of data for testing")
+    parser.add_argument("--random_seed", type=int, default=42, help="Random seed for dataset splitting")
     args = parser.parse_args()
     
     t1_dir = args.t1_dir
@@ -267,8 +388,35 @@ if __name__ == "__main__":
             t1_slice, t2_slice = dataset[0]
             print(f"T1 slice shape: {t1_slice.shape}, T2 slice shape: {t2_slice.shape}")
             
-            # Visualize samples
-            if args.visualize:
+            # Create train/val/test splits if requested
+            if args.create_splits:
+                train_dataset, val_dataset, test_dataset = split_dataset(
+                    dataset,
+                    train_ratio=args.train_ratio,
+                    val_ratio=args.val_ratio,
+                    test_ratio=args.test_ratio,
+                    random_seed=args.random_seed,
+                    save_dir=args.split_dir
+                )
+                
+                # Visualize some examples from each split
+                if args.visualize:
+                    splits = {
+                        'train': train_dataset, 
+                        'validation': val_dataset,
+                        'test': test_dataset
+                    }
+                    
+                    os.makedirs("./visualizations", exist_ok=True)
+                    
+                    for split_name, split_dataset in splits.items():
+                        if len(split_dataset) > 0:
+                            fig = visualize_dataset_samples(split_dataset, num_samples=min(3, len(split_dataset)))
+                            fig.savefig(f"./visualizations/{split_name}_samples.png")
+                            print(f"Saved {split_name} visualization to ./visualizations/{split_name}_samples.png")
+            
+            # Visualize general samples if requested
+            elif args.visualize:
                 fig = visualize_dataset_samples(dataset)
                 os.makedirs("./visualizations", exist_ok=True)
                 fig.savefig("./visualizations/dataset_samples.png")
