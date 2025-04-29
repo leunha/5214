@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import time
 
+from evaluate_monai import evaluate_model
+
 class EfficientPretrainedFlow(nn.Module):
     """
     Efficient Rectified Flow model for T1-to-T2 MRI translation using a pre-trained ResNet18
@@ -522,17 +524,22 @@ def main():
     from dataset import create_data_loaders
     import argparse
     import os  # Ensure os is imported here too
+    from datetime import datetime
     
     parser = argparse.ArgumentParser(description='Quick train pretrained Rectified Flow for MRI Translation')
     
     # Data arguments
     parser.add_argument('--t1_dir', type=str, required=True, help='Directory containing T1 slices')
     parser.add_argument('--t2_dir', type=str, required=True, help='Directory containing T2 slices')
-    
+    parser.add_argument('--train_ratio', type=float, default=0.7, help='Training ratio for train/val split')
+    parser.add_argument('--val_ratio', type=float, default=0.15, help='Validation ratio for train/val split')
+    parser.add_argument('--test_ratio', type=float, default=0.15, help='Test ratio for train/val split')
+
     # Model arguments
     parser.add_argument('--freeze_ratio', type=float, default=0.95, 
                         help='Proportion of parameters to freeze (0.0-1.0)')
     parser.add_argument('--img_size', type=int, default=256, help='Image size')
+    parser.add_argument('--num_steps', type=int, default=20, help='Number of steps for ODE integration')
     
     # Training arguments
     parser.add_argument('--batch_size', type=int, default=4, help='Batch size for training')
@@ -553,6 +560,10 @@ def main():
     print(f"Using device: {device}")
     
     # Create output directories
+    # Set up output directory with absolute path
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    args.output_dir = os.path.abspath(os.path.join(args.output_dir, f"run_{timestamp}"))
+    os.makedirs(args.output_dir, exist_ok=True)
     print(f"Creating output directory: {args.output_dir}")
     os.makedirs(args.output_dir, exist_ok=True)
     vis_dir = os.path.join(args.output_dir, 'visualizations')
@@ -560,11 +571,13 @@ def main():
     print(f"Created visualization directory: {vis_dir}")
     
     # Create data loaders
-    train_loader, val_loader = create_data_loaders(
+    train_loader, val_loader, test_loader = create_data_loaders(
         args.t1_dir,
         args.t2_dir,
         batch_size=args.batch_size,
-        train_ratio=0.8,
+        train_ratio=args.train_ratio,
+        val_ratio=args.val_ratio,
+        test_ratio=args.test_ratio,
         num_workers=args.num_workers
     )
     
@@ -592,6 +605,23 @@ def main():
     )
     
     print("Quick training completed!")
+
+    # Evaluate the model on the test set
+    evaluate_model(
+        model,
+        test_loader,
+        device,
+        num_steps=args.num_steps,
+        output_dir=args.output_dir
+    )
+    evaluate_model(
+        model,
+        test_loader,
+        device,
+        num_steps=1,
+        output_dir=args.output_dir
+    )
+    
 
 if __name__ == "__main__":
     main() 

@@ -1,10 +1,11 @@
-t1_dir: .\processed_dataset\IXI-T1
-t2_dir: .\processed_dataset\IXI-T2
-model_path: .\monai_results_middle30\run_20250404_145820\checkpoint_epoch_3.pt
+t1_dir: .\processed_dataset\IXI-T1-full
+t2_dir: .\processed_dataset\IXI-T2-full
+model_path: .\test_fix_visualization\run_20250405_010321\checkpoint_epoch_20.pt
 batch_size: 8
 num_workers: 4
-device: cpu
+device: cuda
 output_dir: .\test_fix_identical_metrics
 num_steps: 50
-test_subset: 3
+test_subset: 30
 max_test_batches: None
+features: [64, 128, 256, 256]

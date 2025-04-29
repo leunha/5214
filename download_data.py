@@ -57,6 +57,10 @@ def extract_tar(tar_path, extract_dir):
         return False
 
 def main():
+    if os.path.exists('./ixi_dataset'):
+        print("IXI dataset already exists, skipping download.")
+        return
+    
     # Create main output directory
     os.makedirs('./ixi_dataset', exist_ok=True)
     

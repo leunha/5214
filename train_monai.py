@@ -15,6 +15,8 @@ import pandas as pd
 from dataset import MRISliceDataset, create_data_loaders
 from monai_rectified_flow import MonaiRectifiedFlow, RectifiedFlowODE, SSIM
 
+from evaluate_monai import evaluate_model
+
 def save_checkpoint(model, optimizer, epoch, loss, args):
     """Save model checkpoint"""
     os.makedirs(args.output_dir, exist_ok=True)
@@ -393,11 +395,13 @@ def main(args):
     logging.info(f"Saved configuration to {config_path}")
     
     # Create data loaders
-    train_loader, val_loader = create_data_loaders(
+    train_loader, val_loader, test_loader = create_data_loaders(
         args.t1_dir,
         args.t2_dir,
         batch_size=args.batch_size,
-        train_ratio=0.8,
+        train_ratio=args.train_ratio,
+        val_ratio=args.val_ratio,
+        test_ratio=args.test_ratio,
         num_workers=args.num_workers
     )
     
@@ -511,9 +515,27 @@ def main(args):
         }, reflowed_model_path)
         
         logging.info(f"Reflowed model saved to {reflowed_model_path}")
-        
-        # Visualize results after reflow
-        visualize_results(rf.model, rf, val_loader, args.epochs + 1, args)
+
+    # Evaluate the model on the test set
+    start_time = time.time()
+    
+    evaluate_model(
+        rf.model,
+        test_loader,
+        args.device,
+        num_steps=args.num_steps,
+        output_dir=args.output_dir
+    )
+    evaluate_model(
+        rf.model,
+        test_loader,
+        args.device,
+        num_steps=1,
+        output_dir=args.output_dir
+    )
+    
+    total_time = time.time() - start_time
+    logging.info(f"Evaluation completed in {total_time/60:.2f} minutes")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train MONAI-based Rectified Flow for MRI Translation')
@@ -521,7 +543,11 @@ if __name__ == "__main__":
     # Data arguments
     parser.add_argument('--t1_dir', type=str, required=True, help='Directory containing T1 slices')
     parser.add_argument('--t2_dir', type=str, required=True, help='Directory containing T2 slices')
-    
+    parser.add_argument('--train_ratio', type=float, default=0.7, help='Training ratio for train/val split')
+    parser.add_argument('--val_ratio', type=float, default=0.15, help='Validation ratio for train/val split')
+    parser.add_argument('--test_ratio', type=float, default=0.15, help='Test ratio for train/val split')
+
+
     # Model arguments
     parser.add_argument('--features', type=int, nargs='+', default=[32, 64, 128, 256],
                         help='Features for UNet layers')

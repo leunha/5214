@@ -31,7 +31,7 @@ def process_ixi_dataset(t1_dir, t2_dir, output_dir, num_subjects=None, registrat
     print(f"Found {len(common_subjects)} subjects with both T1 and T2 scans")
     
     # Limit number of subjects if specified
-    if num_subjects is not None:
+    if num_subjects != 0:
         common_subjects = list(common_subjects)[:num_subjects]
         print(f"Processing {len(common_subjects)} subjects")
     

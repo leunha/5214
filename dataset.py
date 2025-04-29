@@ -201,7 +201,7 @@ def visualize_dataset_samples(dataset, num_samples=5, figsize=(20, 15)):
     return fig
 
 def split_dataset(dataset, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15, 
-                  random_seed=42, save_dir="./dataset_splits"):
+                  random_seed=42, save_name="./dataset_splits/dataset_split.json"):
     """
     Split dataset into train, validation and test sets
     
@@ -211,7 +211,7 @@ def split_dataset(dataset, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15,
         val_ratio: Ratio for validation set  
         test_ratio: Ratio for test set
         random_seed: Random seed for reproducibility
-        save_dir: Directory to save the split indices
+        save_name: Name of the file to save the split indices
         
     Returns:
         train_dataset, val_dataset, test_dataset
@@ -237,7 +237,7 @@ def split_dataset(dataset, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15,
     test_indices = indices[train_size + val_size:]
     
     # Create directory to save indices
-    os.makedirs(save_dir, exist_ok=True)
+    os.makedirs(os.path.dirname(save_name), exist_ok=True)
     
     # Save indices for reproducibility
     split_info = {
@@ -251,7 +251,7 @@ def split_dataset(dataset, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15,
         'total_size': total_size
     }
     
-    with open(os.path.join(save_dir, 'dataset_split.json'), 'w') as f:
+    with open(save_name, 'w') as f:
         json.dump(split_info, f)
     
     # Create subsets
@@ -260,7 +260,7 @@ def split_dataset(dataset, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15,
     test_dataset = torch.utils.data.Subset(dataset, test_indices)
     
     print(f"Dataset split: {len(train_dataset)} training, {len(val_dataset)} validation, {len(test_dataset)} test samples")
-    print(f"Split indices saved to {os.path.join(save_dir, 'dataset_split.json')}")
+    print(f"Split indices saved to {save_name}")
     
     return train_dataset, val_dataset, test_dataset
 
@@ -294,7 +294,7 @@ def load_existing_split(dataset, split_file):
 
 def create_data_loaders(t1_dir, t2_dir, batch_size=4, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15,
                        normalize=True, num_workers=4, transform=None, random_seed=42,
-                       split_dir="./dataset_splits", use_existing_split=False):
+                       split_dir=None, use_existing_split=True):
     """
     Create train, validation, and test data loaders with proper splitting
     
@@ -318,11 +318,18 @@ def create_data_loaders(t1_dir, t2_dir, batch_size=4, train_ratio=0.7, val_ratio
     # Create dataset
     dataset = MRISliceDataset(t1_dir, t2_dir, transform=transform, normalize=normalize)
     
+    if split_dir is None:
+        split_dir = f"./{os.path.basename(t1_dir)}_{os.path.basename(t2_dir)}_splits"
+
+    # print(f"Split directory: {split_dir}")
+
     # Check if we should use existing split
-    split_file = os.path.join(split_dir, 'dataset_split.json')
+    split_file = os.path.join(split_dir, f'{train_ratio}_{val_ratio}_{test_ratio}_{random_seed}.json')
     if use_existing_split and os.path.exists(split_file):
+        print("Using existing split")
         train_dataset, val_dataset, test_dataset = load_existing_split(dataset, split_file)
     else:
+        print("Creating new split")
         # Create a new split
         train_dataset, val_dataset, test_dataset = split_dataset(
             dataset, 
@@ -330,7 +337,7 @@ def create_data_loaders(t1_dir, t2_dir, batch_size=4, train_ratio=0.7, val_ratio
             val_ratio=val_ratio, 
             test_ratio=test_ratio,
             random_seed=random_seed,
-            save_dir=split_dir
+            save_name=split_file
         )
     
     # Create data loaders

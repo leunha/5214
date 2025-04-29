@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 
+from evaluate_monai import evaluate_model
+
 class SimplePretrainedModel(nn.Module):
     """
     Simplified pre-trained model for T1-to-T2 MRI translation.
@@ -246,6 +248,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Quick Demo of Pretrained MRI Translation')
     parser.add_argument('--t1_dir', type=str, required=True, help='Directory containing T1 slices')
     parser.add_argument('--t2_dir', type=str, required=True, help='Directory containing T2 slices')
+    parser.add_argument('--train_ratio', type=float, default=0.7, help='Training ratio for train/val split')
+    parser.add_argument('--val_ratio', type=float, default=0.15, help='Validation ratio for train/val split')
+    parser.add_argument('--test_ratio', type=float, default=0.15, help='Test ratio for train/val split')
     parser.add_argument('--freeze_percent', type=float, default=0.95, help='Percentage of backbone to freeze')
     parser.add_argument('--batch_size', type=int, default=4, help='Batch size')
     parser.add_argument('--output_dir', type=str, default='./demo_results', help='Output directory')
@@ -257,11 +262,13 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
     
     # Create data loaders
-    train_loader, _ = create_data_loaders(
+    train_loader, val_loader, test_loader = create_data_loaders(
         args.t1_dir,
         args.t2_dir,
         batch_size=args.batch_size,
-        train_ratio=0.8,
+        train_ratio=args.train_ratio,
+        val_ratio=args.val_ratio,
+        test_ratio=args.test_ratio,
         num_workers=0  # No parallelism for simple demo
     )
     
@@ -271,10 +278,26 @@ if __name__ == "__main__":
     model = SimplePretrainedModel(freeze_percent=args.freeze_percent).to(device)
     
     # Train model
-    quick_train_demo(
+    model = quick_train_demo(
         model,
         train_loader,
         device,
         args.output_dir,
         num_steps=args.num_steps
-    ) 
+    )
+
+    # Evaluate the model on the test set
+    evaluate_model(
+        model,
+        test_loader,
+        device,
+        num_steps=args.num_steps,
+        output_dir=args.output_dir
+    )
+    evaluate_model(
+        model,
+        test_loader,
+        device,
+        num_steps=1,
+        output_dir=args.output_dir
+    )
