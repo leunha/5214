@@ -6,3 +6,4 @@
 *.pt
 /env
 *.pyc
+/grid_search_results/*/*/visualizations

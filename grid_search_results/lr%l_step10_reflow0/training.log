@@ -1,0 +1,16 @@
+2025-04-30 00:07:00,895 - INFO - Using device: cuda
+2025-04-30 00:07:00,895 - INFO - Output directory: C:\Users\erast\Documents\5214\grid_search_results\lr%l_step10_reflow0\run_20250430_000700
+2025-04-30 00:07:00,896 - INFO - Visualization directory: C:\Users\erast\Documents\5214\grid_search_results\lr%l_step10_reflow0\run_20250430_000700\visualizations
+2025-04-30 00:07:00,897 - INFO - Saved configuration to C:\Users\erast\Documents\5214\grid_search_results\lr%l_step10_reflow0\run_20250430_000700\config.txt
+2025-04-30 00:07:01,440 - INFO - Training on 251 samples
+2025-04-30 00:07:01,441 - INFO - Validating on 54 samples
+2025-04-30 00:07:17,420 - INFO - Source shape: torch.Size([64, 1, 256, 256]), Target shape: torch.Size([64, 1, 256, 256])
+2025-04-30 00:07:17,440 - INFO - Model created with 1,605,178 parameters (1,605,178 trainable)
+2025-04-30 00:07:43,460 - INFO - Epoch 1/1, Train Loss: 1.120938, Val Loss: 0.094484
+2025-04-30 00:07:43,460 - INFO -   Train RF Loss: 0.382402, L1 Loss: 0.484667, SSIM Loss: 0.992405, SSIM Value: 0.9924
+2025-04-30 00:07:43,460 - INFO -   Val SSIM: 0.0557, Val L1: 0.262259
+2025-04-30 00:07:43,498 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\lr%l_step10_reflow0\run_20250430_000700\best_model.pt
+2025-04-30 00:07:53,876 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\lr%l_step10_reflow0\run_20250430_000700\checkpoint_epoch_1.pt
+2025-04-30 00:07:53,876 - INFO - Training completed in 0.61 minutes
+2025-04-30 00:07:54,000 - INFO - Saved final model to C:\Users\erast\Documents\5214\grid_search_results\lr%l_step10_reflow0\run_20250430_000700\final_model.pt
+2025-04-30 00:08:16,820 - INFO - Evaluation completed in 0.38 minutes

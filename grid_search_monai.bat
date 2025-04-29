@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 REM Define parameter ranges to search
-set "num_steps=10 20 50"
-set "reflow_steps=0 1 2 3"
+set "num_steps=10 50"
+set "reflow_steps=0 1 2"
 @REM set "learning_rates=0.1"
 @REM set "num_steps=1 2"
 @REM set "reflow_steps=0"
