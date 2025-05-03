@@ -1,0 +1,136 @@
+2025-05-02 07:24:33,809 - INFO - Using device: cuda
+2025-05-02 07:24:33,810 - INFO - Output directory: C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433
+2025-05-02 07:24:33,810 - INFO - Visualization directory: C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\visualizations
+2025-05-02 07:24:33,810 - INFO - Saved configuration to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\config.txt
+2025-05-02 07:25:43,030 - INFO - Training on 29091 samples
+2025-05-02 07:25:43,030 - INFO - Validating on 6233 samples
+2025-05-02 07:26:10,367 - INFO - Source shape: torch.Size([64, 1, 256, 256]), Target shape: torch.Size([64, 1, 256, 256])
+2025-05-02 07:26:10,408 - INFO - Model created with 1,605,178 parameters (1,605,178 trainable)
+2025-05-02 08:06:45,409 - INFO - Epoch 1/25, Train Loss: 0.499231, Val Loss: 0.048035
+2025-05-02 08:06:45,410 - INFO -   Train RF Loss: 0.072003, L1 Loss: 0.165584, SSIM Loss: 0.688873, SSIM Value: 0.6889
+2025-05-02 08:06:45,410 - INFO -   Val SSIM: 0.4252, Val L1: 0.135456
+2025-05-02 08:06:45,445 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 08:07:16,517 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_1.pt
+2025-05-02 08:47:44,097 - INFO - Epoch 2/25, Train Loss: 0.401493, Val Loss: 0.035945
+2025-05-02 08:47:44,097 - INFO -   Train RF Loss: 0.044523, L1 Loss: 0.129690, SSIM Loss: 0.584250, SSIM Value: 0.5843
+2025-05-02 08:47:44,098 - INFO -   Val SSIM: 0.4574, Val L1: 0.119341
+2025-05-02 08:47:44,130 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 08:48:11,123 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_2.pt
+2025-05-02 09:28:54,175 - INFO - Epoch 3/25, Train Loss: 0.364568, Val Loss: 0.029974
+2025-05-02 09:28:54,176 - INFO -   Train RF Loss: 0.035441, L1 Loss: 0.117163, SSIM Loss: 0.541091, SSIM Value: 0.5411
+2025-05-02 09:28:54,176 - INFO -   Val SSIM: 0.4954, Val L1: 0.109130
+2025-05-02 09:28:54,210 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 09:29:25,892 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_3.pt
+2025-05-02 10:09:59,659 - INFO - Epoch 4/25, Train Loss: 0.337290, Val Loss: 0.040421
+2025-05-02 10:09:59,659 - INFO -   Train RF Loss: 0.031028, L1 Loss: 0.108583, SSIM Loss: 0.503940, SSIM Value: 0.5039
+2025-05-02 10:09:59,659 - INFO -   Val SSIM: 0.5173, Val L1: 0.109521
+2025-05-02 10:09:59,660 - INFO - No improvement for 1 epochs.
+2025-05-02 10:09:59,693 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_4.pt
+2025-05-02 10:50:42,543 - INFO - Epoch 5/25, Train Loss: 0.317347, Val Loss: 0.025050
+2025-05-02 10:50:42,543 - INFO -   Train RF Loss: 0.028321, L1 Loss: 0.100917, SSIM Loss: 0.477135, SSIM Value: 0.4771
+2025-05-02 10:50:42,544 - INFO -   Val SSIM: 0.5448, Val L1: 0.095666
+2025-05-02 10:50:42,580 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 10:51:13,748 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_5.pt
+2025-05-02 11:31:57,822 - INFO - Epoch 6/25, Train Loss: 0.305057, Val Loss: 0.025038
+2025-05-02 11:31:57,822 - INFO -   Train RF Loss: 0.026155, L1 Loss: 0.093485, SSIM Loss: 0.464320, SSIM Value: 0.4643
+2025-05-02 11:31:57,823 - INFO -   Val SSIM: 0.5567, Val L1: 0.089750
+2025-05-02 11:31:57,859 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 11:32:28,719 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_6.pt
+2025-05-02 12:12:58,886 - INFO - Epoch 7/25, Train Loss: 0.290394, Val Loss: 0.035892
+2025-05-02 12:12:58,886 - INFO -   Train RF Loss: 0.023766, L1 Loss: 0.085413, SSIM Loss: 0.447843, SSIM Value: 0.4478
+2025-05-02 12:12:58,886 - INFO -   Val SSIM: 0.5690, Val L1: 0.084140
+2025-05-02 12:12:58,887 - INFO - No improvement for 1 epochs.
+2025-05-02 12:12:58,919 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_7.pt
+2025-05-02 12:53:31,006 - INFO - Epoch 8/25, Train Loss: 0.274758, Val Loss: 0.034243
+2025-05-02 12:53:31,006 - INFO -   Train RF Loss: 0.020774, L1 Loss: 0.077093, SSIM Loss: 0.430874, SSIM Value: 0.4309
+2025-05-02 12:53:31,007 - INFO -   Val SSIM: 0.5823, Val L1: 0.077081
+2025-05-02 12:53:31,007 - INFO - No improvement for 2 epochs.
+2025-05-02 12:53:31,041 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_8.pt
+2025-05-02 13:34:02,082 - INFO - Epoch 9/25, Train Loss: 0.264077, Val Loss: 0.020950
+2025-05-02 13:34:02,082 - INFO -   Train RF Loss: 0.017952, L1 Loss: 0.071326, SSIM Loss: 0.420922, SSIM Value: 0.4209
+2025-05-02 13:34:02,082 - INFO -   Val SSIM: 0.5912, Val L1: 0.068810
+2025-05-02 13:34:02,115 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 13:34:32,795 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_9.pt
+2025-05-02 14:14:56,361 - INFO - Epoch 10/25, Train Loss: 0.253413, Val Loss: 0.019382
+2025-05-02 14:14:56,362 - INFO -   Train RF Loss: 0.015262, L1 Loss: 0.066239, SSIM Loss: 0.410062, SSIM Value: 0.4101
+2025-05-02 14:14:56,362 - INFO -   Val SSIM: 0.6089, Val L1: 0.064928
+2025-05-02 14:14:56,397 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 14:15:27,753 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_10.pt
+2025-05-02 14:56:02,646 - INFO - Epoch 11/25, Train Loss: 0.247799, Val Loss: 0.013124
+2025-05-02 14:56:02,647 - INFO -   Train RF Loss: 0.013397, L1 Loss: 0.063295, SSIM Loss: 0.405510, SSIM Value: 0.4055
+2025-05-02 14:56:02,647 - INFO -   Val SSIM: 0.6085, Val L1: 0.061326
+2025-05-02 14:56:02,679 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 14:56:29,314 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_11.pt
+2025-05-02 15:37:06,322 - INFO - Epoch 12/25, Train Loss: 0.241069, Val Loss: 0.011657
+2025-05-02 15:37:06,322 - INFO -   Train RF Loss: 0.012178, L1 Loss: 0.061351, SSIM Loss: 0.396432, SSIM Value: 0.3964
+2025-05-02 15:37:06,323 - INFO -   Val SSIM: 0.6220, Val L1: 0.058965
+2025-05-02 15:37:06,355 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 15:37:37,136 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_12.pt
+2025-05-02 16:18:06,612 - INFO - Epoch 13/25, Train Loss: 0.235583, Val Loss: 0.011640
+2025-05-02 16:18:06,612 - INFO -   Train RF Loss: 0.011203, L1 Loss: 0.059309, SSIM Loss: 0.389450, SSIM Value: 0.3895
+2025-05-02 16:18:06,612 - INFO -   Val SSIM: 0.6192, Val L1: 0.059449
+2025-05-02 16:18:06,644 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 16:18:37,702 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_13.pt
+2025-05-02 16:59:05,286 - INFO - Epoch 14/25, Train Loss: 0.229705, Val Loss: 0.011196
+2025-05-02 16:59:05,286 - INFO -   Train RF Loss: 0.010514, L1 Loss: 0.057686, SSIM Loss: 0.380696, SSIM Value: 0.3807
+2025-05-02 16:59:05,287 - INFO -   Val SSIM: 0.6259, Val L1: 0.059079
+2025-05-02 16:59:05,321 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 16:59:36,090 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_14.pt
+2025-05-02 17:39:58,974 - INFO - Epoch 15/25, Train Loss: 0.225793, Val Loss: 0.009748
+2025-05-02 17:39:58,974 - INFO -   Train RF Loss: 0.010077, L1 Loss: 0.056543, SSIM Loss: 0.374888, SSIM Value: 0.3749
+2025-05-02 17:39:58,975 - INFO -   Val SSIM: 0.6425, Val L1: 0.055075
+2025-05-02 17:39:59,009 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 17:40:25,865 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_15.pt
+2025-05-02 18:20:57,455 - INFO - Epoch 16/25, Train Loss: 0.222391, Val Loss: 0.009484
+2025-05-02 18:20:57,455 - INFO -   Train RF Loss: 0.009782, L1 Loss: 0.055568, SSIM Loss: 0.369649, SSIM Value: 0.3696
+2025-05-02 18:20:57,456 - INFO -   Val SSIM: 0.6446, Val L1: 0.054356
+2025-05-02 18:20:57,494 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 18:21:28,347 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_16.pt
+2025-05-02 19:01:45,345 - INFO - Epoch 17/25, Train Loss: 0.219965, Val Loss: 0.009077
+2025-05-02 19:01:45,345 - INFO -   Train RF Loss: 0.009545, L1 Loss: 0.054833, SSIM Loss: 0.366006, SSIM Value: 0.3660
+2025-05-02 19:01:45,346 - INFO -   Val SSIM: 0.6518, Val L1: 0.052872
+2025-05-02 19:01:45,378 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 19:02:16,784 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_17.pt
+2025-05-02 19:42:39,450 - INFO - Epoch 18/25, Train Loss: 0.217113, Val Loss: 0.009315
+2025-05-02 19:42:39,450 - INFO -   Train RF Loss: 0.009390, L1 Loss: 0.054234, SSIM Loss: 0.361211, SSIM Value: 0.3612
+2025-05-02 19:42:39,450 - INFO -   Val SSIM: 0.6594, Val L1: 0.053497
+2025-05-02 19:42:39,450 - INFO - No improvement for 1 epochs.
+2025-05-02 19:42:39,492 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_18.pt
+2025-05-02 20:23:46,302 - INFO - Epoch 19/25, Train Loss: 0.212915, Val Loss: 0.008863
+2025-05-02 20:23:46,303 - INFO -   Train RF Loss: 0.009147, L1 Loss: 0.053337, SSIM Loss: 0.354200, SSIM Value: 0.3542
+2025-05-02 20:23:46,303 - INFO -   Val SSIM: 0.6729, Val L1: 0.051899
+2025-05-02 20:23:46,342 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 20:24:17,426 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_19.pt
+2025-05-02 21:04:46,004 - INFO - Epoch 20/25, Train Loss: 0.209549, Val Loss: 0.008734
+2025-05-02 21:04:46,004 - INFO -   Train RF Loss: 0.008986, L1 Loss: 0.052675, SSIM Loss: 0.348452, SSIM Value: 0.3485
+2025-05-02 21:04:46,004 - INFO -   Val SSIM: 0.6579, Val L1: 0.051549
+2025-05-02 21:04:46,039 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 21:05:12,804 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_20.pt
+2025-05-02 21:45:35,891 - INFO - Epoch 21/25, Train Loss: 0.208185, Val Loss: 0.008566
+2025-05-02 21:45:35,891 - INFO -   Train RF Loss: 0.008837, L1 Loss: 0.052162, SSIM Loss: 0.346534, SSIM Value: 0.3465
+2025-05-02 21:45:35,892 - INFO -   Val SSIM: 0.6578, Val L1: 0.051323
+2025-05-02 21:45:35,926 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 21:46:06,408 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_21.pt
+2025-05-02 22:26:31,374 - INFO - Epoch 22/25, Train Loss: 0.206091, Val Loss: 0.008739
+2025-05-02 22:26:31,375 - INFO -   Train RF Loss: 0.008803, L1 Loss: 0.051959, SSIM Loss: 0.342617, SSIM Value: 0.3426
+2025-05-02 22:26:31,375 - INFO -   Val SSIM: 0.6749, Val L1: 0.051365
+2025-05-02 22:26:31,375 - INFO - No improvement for 1 epochs.
+2025-05-02 22:26:31,412 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_22.pt
+2025-05-02 23:07:00,065 - INFO - Epoch 23/25, Train Loss: 0.202568, Val Loss: 0.008697
+2025-05-02 23:07:00,065 - INFO -   Train RF Loss: 0.008576, L1 Loss: 0.051100, SSIM Loss: 0.336885, SSIM Value: 0.3369
+2025-05-02 23:07:00,065 - INFO -   Val SSIM: 0.6731, Val L1: 0.051062
+2025-05-02 23:07:00,066 - INFO - No improvement for 2 epochs.
+2025-05-02 23:07:00,105 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_23.pt
+2025-05-02 23:47:30,738 - INFO - Epoch 24/25, Train Loss: 0.202005, Val Loss: 0.008333
+2025-05-02 23:47:30,738 - INFO -   Train RF Loss: 0.008464, L1 Loss: 0.050786, SSIM Loss: 0.336295, SSIM Value: 0.3363
+2025-05-02 23:47:30,738 - INFO -   Val SSIM: 0.6890, Val L1: 0.049768
+2025-05-02 23:47:30,777 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-02 23:48:01,595 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_24.pt
+2025-05-03 00:28:30,430 - INFO - Epoch 25/25, Train Loss: 0.199298, Val Loss: 0.008034
+2025-05-03 00:28:30,430 - INFO -   Train RF Loss: 0.008359, L1 Loss: 0.050294, SSIM Loss: 0.331582, SSIM Value: 0.3316
+2025-05-03 00:28:30,430 - INFO -   Val SSIM: 0.6737, Val L1: 0.049199
+2025-05-03 00:28:30,467 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\best_model.pt
+2025-05-03 00:29:01,126 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\checkpoint_epoch_25.pt
+2025-05-03 00:29:01,128 - INFO - Training completed in 1022.85 minutes
+2025-05-03 00:29:01,263 - INFO - Saved final model to C:\Users\erast\Documents\5214\grid_search_results\step50\run_20250502_072433\final_model.pt
+2025-05-03 00:43:47,847 - INFO - Applying reflow procedure with 1 steps

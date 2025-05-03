@@ -1,0 +1,58 @@
+2025-05-04 01:54:29,463 - INFO - Using device: cuda
+2025-05-04 01:54:29,464 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_015429
+2025-05-04 01:57:02,117 - INFO - Using device: cuda
+2025-05-04 01:57:02,118 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_015702
+2025-05-04 01:59:37,962 - INFO - Using device: cuda
+2025-05-04 01:59:37,963 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_015937
+2025-05-04 02:02:29,552 - INFO - Using device: cuda
+2025-05-04 02:02:29,552 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_020229
+2025-05-04 02:05:03,790 - INFO - Using device: cuda
+2025-05-04 02:05:03,791 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_020503
+2025-05-04 02:09:34,696 - INFO - Using device: cuda
+2025-05-04 02:09:34,696 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_020934
+2025-05-04 02:13:25,444 - INFO - Using device: cuda
+2025-05-04 02:13:25,445 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_021325
+2025-05-04 02:13:45,316 - INFO - Using device: cuda
+2025-05-04 02:13:45,317 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_021345
+2025-05-04 02:17:07,639 - INFO - Using device: cuda
+2025-05-04 02:17:07,640 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_021707
+2025-05-04 02:19:01,794 - INFO - Using device: cuda
+2025-05-04 02:19:01,795 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_021901
+2025-05-04 02:25:09,557 - INFO - Using device: cuda
+2025-05-04 02:25:09,558 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_022509
+2025-05-04 02:26:40,178 - INFO - Using device: cuda
+2025-05-04 02:26:40,178 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_022640
+2025-05-04 02:29:39,607 - INFO - Using device: cuda
+2025-05-04 02:29:39,608 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_022939
+2025-05-04 02:30:46,901 - INFO - Using device: cuda
+2025-05-04 02:30:46,902 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_023046
+2025-05-04 02:34:16,569 - INFO - Epoch 1/1
+2025-05-04 02:34:16,569 - INFO -   Generator Loss: 1.811999
+2025-05-04 02:34:16,571 - INFO -   Discriminator Loss: 0.560447
+2025-05-04 02:34:16,571 - INFO -   Cycle Loss: 0.570868
+2025-05-04 02:34:16,571 - INFO -   Identity Loss: 0.570251
+2025-05-04 02:34:16,571 - INFO - Training completed in 3.48 minutes
+2025-05-04 02:34:16,705 - INFO - Saved final model
+2025-05-04 02:34:17,065 - INFO - Performing final evaluation on test set...
+2025-05-04 02:35:44,093 - INFO - Using device: cuda
+2025-05-04 02:35:44,093 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_023544
+2025-05-04 02:36:22,608 - INFO - Using device: cuda
+2025-05-04 02:36:22,609 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_023622
+2025-05-04 02:38:37,452 - INFO - Using device: cuda
+2025-05-04 02:38:37,453 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_023837
+2025-05-04 02:39:37,843 - INFO - Using device: cuda
+2025-05-04 02:39:37,845 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_023937
+2025-05-04 02:40:33,994 - INFO - Using device: cuda
+2025-05-04 02:40:33,995 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_024033
+2025-05-04 02:41:20,323 - INFO - Using device: cuda
+2025-05-04 02:41:20,324 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_024120
+2025-05-04 02:43:30,504 - INFO - Epoch 1/1
+2025-05-04 02:43:30,505 - INFO -   Generator Loss: 1.300355
+2025-05-04 02:43:30,505 - INFO -   Discriminator Loss: 0.176393
+2025-05-04 02:43:30,505 - INFO -   Cycle Loss: 0.509030
+2025-05-04 02:43:30,505 - INFO -   Identity Loss: 0.532156
+2025-05-04 02:43:30,505 - INFO - Training completed in 2.16 minutes
+2025-05-04 02:43:30,625 - INFO - Saved final model
+2025-05-04 02:43:30,862 - INFO - Performing final evaluation on test set...
+2025-05-04 02:44:32,189 - INFO - Using device: cuda
+2025-05-04 02:44:32,190 - INFO - Output directory: C:\Users\erast\Documents\5214\cycle_gan_results\run_20250504_024432

@@ -58,7 +58,7 @@ def calculate_metrics(source, generated, target):
         'mae': float(mae_value)
     }
 
-def visualize_results(source_batch, generated_batch, target_batch, trajectories, output_dir, prefix='', num_steps=50):
+def visualize_results(source_batch, generated_batch, target_batch, trajectories, output_dir, prefix='', num_steps=50, reflow=0):
     """
     Visualize evaluation results
     
@@ -97,7 +97,7 @@ def visualize_results(source_batch, generated_batch, target_batch, trajectories,
         axes[2, i].axis('off')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'{prefix}samples_{num_steps}.png'))
+    plt.savefig(os.path.join(output_dir, f'{prefix}samples_{num_steps}_reflow_{reflow}.png'))
     plt.close()
     
     # Visualize trajectory for one sample
@@ -117,7 +117,7 @@ def visualize_results(source_batch, generated_batch, target_batch, trajectories,
         ax.axis('off')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'{prefix}trajectory_{num_steps}.png'))
+    plt.savefig(os.path.join(output_dir, f'{prefix}trajectory_{num_steps}_reflow_{reflow}.png'))
     plt.close()
     
     # Visualize difference maps
@@ -145,10 +145,10 @@ def visualize_results(source_batch, generated_batch, target_batch, trajectories,
             plt.colorbar(im, ax=axes[i, 2])
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'{prefix}difference_maps_{num_steps}.png'))
+    plt.savefig(os.path.join(output_dir, f'{prefix}difference_maps_{num_steps}_reflow_{reflow}.png'))
     plt.close()
 
-def evaluate_model(model, test_loader, device, num_steps=50, output_dir='./evaluation_results', test_samples=None):
+def evaluate_model(model, test_loader, device, num_steps=50, output_dir='./evaluation_results', test_samples=None, reflow=0):
     """
     Evaluate the model on test data
     
@@ -159,7 +159,8 @@ def evaluate_model(model, test_loader, device, num_steps=50, output_dir='./evalu
         num_steps: Number of steps for ODE integration
         output_dir: Directory to save results
         test_samples: Number of samples to test (None = all)
-        
+        reflow: Number of reflow steps
+
     Returns:
         pd.DataFrame: Metrics for each test sample
     """
@@ -205,7 +206,8 @@ def evaluate_model(model, test_loader, device, num_steps=50, output_dir='./evalu
                     target_batch, 
                     trajectories, 
                     output_dir,
-                    num_steps=num_steps
+                    num_steps=num_steps,
+                    reflow=reflow
                 )
                 visualization_done = True
     
@@ -214,11 +216,11 @@ def evaluate_model(model, test_loader, device, num_steps=50, output_dir='./evalu
     
     # Save metrics CSV
     os.makedirs(output_dir, exist_ok=True)
-    df_metrics.to_csv(os.path.join(output_dir, f'metrics_{num_steps}.csv'), index=False)
+    df_metrics.to_csv(os.path.join(output_dir, f'metrics_{num_steps}_reflow_{reflow}.csv'), index=False)
     
     # Calculate and print summary statistics
     summary = df_metrics.describe()
-    summary.to_csv(os.path.join(output_dir, f'metrics_summary_{num_steps}.csv'))
+    summary.to_csv(os.path.join(output_dir, f'metrics_summary_{num_steps}_reflow_{reflow}.csv'))
     
     print("\nMetrics Summary:")
     print(summary)
@@ -228,7 +230,7 @@ def evaluate_model(model, test_loader, device, num_steps=50, output_dir='./evalu
     plt.boxplot([df_metrics['psnr'], df_metrics['ssim'], df_metrics['mse'] * 100, df_metrics['mae'] * 100])
     plt.xticks([1, 2, 3, 4], ['PSNR', 'SSIM', 'MSE×100', 'MAE×100'])
     plt.title('Metrics Distribution')
-    plt.savefig(os.path.join(output_dir, f'metrics_boxplot_{num_steps}.png'))
+    plt.savefig(os.path.join(output_dir, f'metrics_boxplot_{num_steps}_reflow_{reflow}.png'))
     plt.close()
     
     # Create histograms for each metric
@@ -252,7 +254,7 @@ def evaluate_model(model, test_loader, device, num_steps=50, output_dir='./evalu
     axes[3].set_xlabel('MAE')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f'metrics_histograms_{num_steps}.png'))
+    plt.savefig(os.path.join(output_dir, f'metrics_histograms_{num_steps}_reflow_{reflow}.png'))
     plt.close()
     
     return df_metrics

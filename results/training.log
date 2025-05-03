@@ -1,0 +1,195 @@
+2025-05-03 23:30:26,783 - INFO - Using device: cuda
+2025-05-03 23:30:26,784 - INFO - Output directory: C:\Users\erast\Documents\5214\results\run_20250503_233026
+2025-05-03 23:30:26,784 - INFO - Visualization directory: C:\Users\erast\Documents\5214\results\run_20250503_233026\visualizations
+2025-05-03 23:30:26,785 - INFO - Saved configuration to C:\Users\erast\Documents\5214\results\run_20250503_233026\config.txt
+2025-05-03 23:30:27,406 - INFO - Training on 251 samples
+2025-05-03 23:30:27,407 - INFO - Validating on 54 samples
+2025-05-03 23:31:49,179 - INFO - Epoch 1/20
+2025-05-03 23:31:49,179 - INFO -   Generator Loss: 0.757382
+2025-05-03 23:31:49,179 - INFO -   Discriminator Loss: 0.233037
+2025-05-03 23:31:49,179 - INFO -   Cycle Loss: 0.109692
+2025-05-03 23:31:49,179 - INFO -   Identity Loss: 0.105661
+2025-05-03 23:33:14,182 - INFO - Epoch 2/20
+2025-05-03 23:33:14,183 - INFO -   Generator Loss: 0.630819
+2025-05-03 23:33:14,183 - INFO -   Discriminator Loss: 0.208068
+2025-05-03 23:33:14,183 - INFO -   Cycle Loss: 0.081140
+2025-05-03 23:33:14,183 - INFO -   Identity Loss: 0.068545
+2025-05-03 23:34:42,137 - INFO - Epoch 3/20
+2025-05-03 23:34:42,137 - INFO -   Generator Loss: 0.556322
+2025-05-03 23:34:42,138 - INFO -   Discriminator Loss: 0.208601
+2025-05-03 23:34:42,138 - INFO -   Cycle Loss: 0.072140
+2025-05-03 23:34:42,138 - INFO -   Identity Loss: 0.053562
+2025-05-03 23:36:06,587 - INFO - Epoch 4/20
+2025-05-03 23:36:06,587 - INFO -   Generator Loss: 0.514916
+2025-05-03 23:36:06,587 - INFO -   Discriminator Loss: 0.220724
+2025-05-03 23:36:06,587 - INFO -   Cycle Loss: 0.072234
+2025-05-03 23:36:06,587 - INFO -   Identity Loss: 0.050674
+2025-05-03 23:37:30,093 - INFO - Epoch 5/20
+2025-05-03 23:37:30,094 - INFO -   Generator Loss: 0.430232
+2025-05-03 23:37:30,094 - INFO -   Discriminator Loss: 0.236477
+2025-05-03 23:37:30,094 - INFO -   Cycle Loss: 0.065606
+2025-05-03 23:37:30,094 - INFO -   Identity Loss: 0.042459
+2025-05-03 23:37:34,910 - INFO - Saved checkpoint for epoch 5
+2025-05-03 23:38:54,687 - INFO - Epoch 6/20
+2025-05-03 23:38:54,687 - INFO -   Generator Loss: 0.445881
+2025-05-03 23:38:54,687 - INFO -   Discriminator Loss: 0.231411
+2025-05-03 23:38:54,687 - INFO -   Cycle Loss: 0.068082
+2025-05-03 23:38:54,687 - INFO -   Identity Loss: 0.040986
+2025-05-03 23:40:18,501 - INFO - Epoch 7/20
+2025-05-03 23:40:18,501 - INFO -   Generator Loss: 0.432232
+2025-05-03 23:40:18,501 - INFO -   Discriminator Loss: 0.226182
+2025-05-03 23:40:18,501 - INFO -   Cycle Loss: 0.063372
+2025-05-03 23:40:18,501 - INFO -   Identity Loss: 0.036592
+2025-05-03 23:41:42,231 - INFO - Epoch 8/20
+2025-05-03 23:41:42,232 - INFO -   Generator Loss: 0.468373
+2025-05-03 23:41:42,232 - INFO -   Discriminator Loss: 0.222242
+2025-05-03 23:41:42,232 - INFO -   Cycle Loss: 0.067648
+2025-05-03 23:41:42,232 - INFO -   Identity Loss: 0.039190
+2025-05-03 23:43:05,461 - INFO - Epoch 9/20
+2025-05-03 23:43:05,461 - INFO -   Generator Loss: 0.510395
+2025-05-03 23:43:05,461 - INFO -   Discriminator Loss: 0.232519
+2025-05-03 23:43:05,462 - INFO -   Cycle Loss: 0.072541
+2025-05-03 23:43:05,462 - INFO -   Identity Loss: 0.044647
+2025-05-03 23:44:28,653 - INFO - Epoch 10/20
+2025-05-03 23:44:28,653 - INFO -   Generator Loss: 0.440295
+2025-05-03 23:44:28,653 - INFO -   Discriminator Loss: 0.216059
+2025-05-03 23:44:28,654 - INFO -   Cycle Loss: 0.062589
+2025-05-03 23:44:28,654 - INFO -   Identity Loss: 0.034895
+2025-05-03 23:44:32,983 - INFO - Saved checkpoint for epoch 10
+2025-05-03 23:45:52,659 - INFO - Epoch 11/20
+2025-05-03 23:45:52,660 - INFO -   Generator Loss: 0.486773
+2025-05-03 23:45:52,660 - INFO -   Discriminator Loss: 0.231485
+2025-05-03 23:45:52,660 - INFO -   Cycle Loss: 0.067693
+2025-05-03 23:45:52,660 - INFO -   Identity Loss: 0.040533
+2025-05-03 23:47:16,328 - INFO - Epoch 12/20
+2025-05-03 23:47:16,329 - INFO -   Generator Loss: 0.448580
+2025-05-03 23:47:16,329 - INFO -   Discriminator Loss: 0.223967
+2025-05-03 23:47:16,329 - INFO -   Cycle Loss: 0.062082
+2025-05-03 23:47:16,329 - INFO -   Identity Loss: 0.035039
+2025-05-03 23:48:39,645 - INFO - Epoch 13/20
+2025-05-03 23:48:39,646 - INFO -   Generator Loss: 0.429884
+2025-05-03 23:48:39,646 - INFO -   Discriminator Loss: 0.223389
+2025-05-03 23:48:39,646 - INFO -   Cycle Loss: 0.057606
+2025-05-03 23:48:39,646 - INFO -   Identity Loss: 0.030154
+2025-05-03 23:50:03,375 - INFO - Epoch 14/20
+2025-05-03 23:50:03,375 - INFO -   Generator Loss: 0.450740
+2025-05-03 23:50:03,375 - INFO -   Discriminator Loss: 0.213844
+2025-05-03 23:50:03,375 - INFO -   Cycle Loss: 0.057286
+2025-05-03 23:50:03,375 - INFO -   Identity Loss: 0.030181
+2025-05-03 23:51:29,563 - INFO - Epoch 15/20
+2025-05-03 23:51:29,563 - INFO -   Generator Loss: 0.645946
+2025-05-03 23:51:29,563 - INFO -   Discriminator Loss: 0.316260
+2025-05-03 23:51:29,563 - INFO -   Cycle Loss: 0.095053
+2025-05-03 23:51:29,563 - INFO -   Identity Loss: 0.065887
+2025-05-03 23:51:34,920 - INFO - Saved checkpoint for epoch 15
+2025-05-03 23:52:57,300 - INFO - Epoch 16/20
+2025-05-03 23:52:57,300 - INFO -   Generator Loss: 0.501918
+2025-05-03 23:52:57,300 - INFO -   Discriminator Loss: 0.220021
+2025-05-03 23:52:57,301 - INFO -   Cycle Loss: 0.076446
+2025-05-03 23:52:57,301 - INFO -   Identity Loss: 0.048331
+2025-05-03 23:54:25,407 - INFO - Epoch 17/20
+2025-05-03 23:54:25,408 - INFO -   Generator Loss: 0.453050
+2025-05-03 23:54:25,408 - INFO -   Discriminator Loss: 0.222840
+2025-05-03 23:54:25,408 - INFO -   Cycle Loss: 0.064714
+2025-05-03 23:54:25,408 - INFO -   Identity Loss: 0.037863
+2025-05-03 23:57:43,394 - INFO - Using device: cuda
+2025-05-03 23:57:43,395 - INFO - Output directory: C:\Users\erast\Documents\5214\results\run_20250503_235743
+2025-05-04 00:03:37,483 - INFO - Using device: cuda
+2025-05-04 00:03:37,484 - INFO - Output directory: C:\Users\erast\Documents\5214\results\run_20250504_000337
+2025-05-04 00:04:57,621 - INFO - Epoch 1/5
+2025-05-04 00:04:57,622 - INFO -   Generator Loss: 1.621248
+2025-05-04 00:04:57,622 - INFO -   Discriminator Loss: 0.229659
+2025-05-04 00:04:57,622 - INFO -   Cycle Loss: 0.075284
+2025-05-04 00:04:57,622 - INFO -   Identity Loss: 0.070889
+2025-05-04 00:06:26,004 - INFO - Epoch 2/5
+2025-05-04 00:06:26,004 - INFO -   Generator Loss: 1.322658
+2025-05-04 00:06:26,004 - INFO -   Discriminator Loss: 0.161381
+2025-05-04 00:06:26,004 - INFO -   Cycle Loss: 0.050711
+2025-05-04 00:06:26,005 - INFO -   Identity Loss: 0.047033
+2025-05-04 00:07:57,041 - INFO - Epoch 3/5
+2025-05-04 00:07:57,041 - INFO -   Generator Loss: 1.187427
+2025-05-04 00:07:57,041 - INFO -   Discriminator Loss: 0.176277
+2025-05-04 00:07:57,041 - INFO -   Cycle Loss: 0.045526
+2025-05-04 00:07:57,042 - INFO -   Identity Loss: 0.040400
+2025-05-04 00:09:24,968 - INFO - Epoch 4/5
+2025-05-04 00:09:24,969 - INFO -   Generator Loss: 1.275880
+2025-05-04 00:09:24,969 - INFO -   Discriminator Loss: 0.150904
+2025-05-04 00:09:24,969 - INFO -   Cycle Loss: 0.048390
+2025-05-04 00:09:24,969 - INFO -   Identity Loss: 0.040042
+2025-05-04 00:09:50,117 - INFO - Using device: cuda
+2025-05-04 00:09:50,117 - INFO - Output directory: C:\Users\erast\Documents\5214\results\run_20250504_000950
+2025-05-04 00:11:11,089 - INFO - Epoch 1/5
+2025-05-04 00:11:11,089 - INFO -   Generator Loss: 1.539337
+2025-05-04 00:11:11,089 - INFO -   Discriminator Loss: 0.236289
+2025-05-04 00:11:11,090 - INFO -   Cycle Loss: 0.072108
+2025-05-04 00:11:11,090 - INFO -   Identity Loss: 0.067555
+2025-05-04 00:12:31,155 - INFO - Epoch 2/5
+2025-05-04 00:12:31,155 - INFO -   Generator Loss: 1.224462
+2025-05-04 00:12:31,156 - INFO -   Discriminator Loss: 0.181246
+2025-05-04 00:12:31,156 - INFO -   Cycle Loss: 0.048474
+2025-05-04 00:12:31,156 - INFO -   Identity Loss: 0.044083
+2025-05-04 00:13:51,112 - INFO - Epoch 3/5
+2025-05-04 00:13:51,112 - INFO -   Generator Loss: 1.201669
+2025-05-04 00:13:51,113 - INFO -   Discriminator Loss: 0.166193
+2025-05-04 00:13:51,113 - INFO -   Cycle Loss: 0.045134
+2025-05-04 00:13:51,113 - INFO -   Identity Loss: 0.039627
+2025-05-04 00:15:11,163 - INFO - Epoch 4/5
+2025-05-04 00:15:11,163 - INFO -   Generator Loss: 1.262429
+2025-05-04 00:15:11,163 - INFO -   Discriminator Loss: 0.140593
+2025-05-04 00:15:11,163 - INFO -   Cycle Loss: 0.044719
+2025-05-04 00:15:11,163 - INFO -   Identity Loss: 0.038890
+2025-05-04 00:16:31,228 - INFO - Epoch 5/5
+2025-05-04 00:16:31,228 - INFO -   Generator Loss: 1.079843
+2025-05-04 00:16:31,228 - INFO -   Discriminator Loss: 0.226701
+2025-05-04 00:16:31,228 - INFO -   Cycle Loss: 0.039509
+2025-05-04 00:16:31,228 - INFO -   Identity Loss: 0.034022
+2025-05-04 00:16:31,523 - INFO - Saved checkpoint for epoch 5
+2025-05-04 00:16:31,523 - INFO - Training completed in 6.68 minutes
+2025-05-04 00:16:31,836 - INFO - Saved final model
+2025-05-04 00:16:31,837 - INFO - Performing final evaluation on test set...
+2025-05-04 00:20:56,406 - INFO - Using device: cuda
+2025-05-04 00:20:56,407 - INFO - Output directory: C:\Users\erast\Documents\5214\results\run_20250504_002056
+2025-05-04 01:05:04,892 - INFO - Using device: cuda
+2025-05-04 01:05:04,893 - INFO - Output directory: C:\Users\erast\Documents\5214\results\run_20250504_010504
+2025-05-04 01:13:10,212 - INFO - Using device: cuda
+2025-05-04 01:13:10,213 - INFO - Output directory: C:\Users\erast\Documents\5214\results\run_20250504_011310
+2025-05-04 01:13:29,105 - INFO - Epoch 1/5
+2025-05-04 01:13:29,105 - INFO -   Generator Loss: 12.070497
+2025-05-04 01:13:29,106 - INFO -   Discriminator Loss: 0.613878
+2025-05-04 01:13:46,807 - INFO - Epoch 2/5
+2025-05-04 01:13:46,807 - INFO -   Generator Loss: 29.016346
+2025-05-04 01:13:46,807 - INFO -   Discriminator Loss: 1.970076
+2025-05-04 01:14:04,802 - INFO - Epoch 3/5
+2025-05-04 01:14:04,802 - INFO -   Generator Loss: 22.033306
+2025-05-04 01:14:04,802 - INFO -   Discriminator Loss: 0.113969
+2025-05-04 01:14:22,275 - INFO - Epoch 4/5
+2025-05-04 01:14:22,275 - INFO -   Generator Loss: 33.826734
+2025-05-04 01:14:22,275 - INFO -   Discriminator Loss: 0.000566
+2025-05-04 01:14:39,382 - INFO - Epoch 5/5
+2025-05-04 01:14:39,382 - INFO -   Generator Loss: 34.509737
+2025-05-04 01:14:39,382 - INFO -   Discriminator Loss: 0.000670
+2025-05-04 01:14:39,999 - INFO - Saved checkpoint for epoch 5
+2025-05-04 01:14:39,999 - INFO - Training completed in 1.49 minutes
+2025-05-04 01:14:40,650 - INFO - Saved final model
+2025-05-04 01:14:40,870 - INFO - Performing final evaluation on test set...
+2025-05-04 01:29:05,490 - INFO - Using device: cuda
+2025-05-04 01:29:05,491 - INFO - Output directory: C:\Users\erast\Documents\5214\results\run_20250504_012905
+2025-05-04 01:29:23,737 - INFO - Epoch 1/5
+2025-05-04 01:29:23,737 - INFO -   Generator Loss: 11.362862
+2025-05-04 01:29:23,738 - INFO -   Discriminator Loss: 2.458307
+2025-05-04 01:29:41,344 - INFO - Epoch 2/5
+2025-05-04 01:29:41,345 - INFO -   Generator Loss: 20.075664
+2025-05-04 01:29:41,345 - INFO -   Discriminator Loss: 0.567863
+2025-05-04 01:29:58,530 - INFO - Epoch 3/5
+2025-05-04 01:29:58,530 - INFO -   Generator Loss: 20.254133
+2025-05-04 01:29:58,530 - INFO -   Discriminator Loss: 0.123161
+2025-05-04 01:30:16,309 - INFO - Epoch 4/5
+2025-05-04 01:30:16,309 - INFO -   Generator Loss: 16.220503
+2025-05-04 01:30:16,310 - INFO -   Discriminator Loss: 0.006443
+2025-05-04 01:30:33,906 - INFO - Epoch 5/5
+2025-05-04 01:30:33,907 - INFO -   Generator Loss: 34.409722
+2025-05-04 01:30:33,907 - INFO -   Discriminator Loss: 1.313248
+2025-05-04 01:30:34,537 - INFO - Saved checkpoint for epoch 5
+2025-05-04 01:30:34,537 - INFO - Training completed in 1.47 minutes
+2025-05-04 01:30:35,199 - INFO - Saved final model
+2025-05-04 01:30:35,409 - INFO - Performing final evaluation on test set...

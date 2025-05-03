@@ -487,55 +487,69 @@ def main(args):
         logging.error(f"Error saving final model: {str(e)}")
         import traceback
         traceback.print_exc()
-    
-    # Optionally apply reflow procedure for better one-step generation
-    if args.reflow_steps > 0:
-        logging.info(f"Applying reflow procedure with {args.reflow_steps} steps")
-        
-        # Get a batch of source images for reflow
-        source_batch, _ = next(iter(train_loader))
-        source_batch = source_batch.to(args.device)
-        
-        # Apply reflow
-        rf.reflow(
-            source_batch,
-            training_steps=args.reflow_steps,
-            batch_size=min(16, source_batch.size(0)),
-            lr=args.learning_rate * 0.1,
-            device=args.device
-        )
-        
-        # Save reflowed model
-        reflowed_model_path = os.path.join(args.output_dir, 'reflowed_model.pt')
-        torch.save({
-            'model_state_dict': rf.model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'args': vars(args),
-            'reflow_steps': args.reflow_steps
-        }, reflowed_model_path)
-        
-        logging.info(f"Reflowed model saved to {reflowed_model_path}")
 
-    # Evaluate the model on the test set
-    start_time = time.time()
-    
     evaluate_model(
         rf.model,
         test_loader,
         args.device,
         num_steps=args.num_steps,
-        output_dir=args.output_dir
+        output_dir=args.output_dir,
+        reflow=0
     )
     evaluate_model(
         rf.model,
         test_loader,
         args.device,
         num_steps=1,
-        output_dir=args.output_dir
+        output_dir=args.output_dir,
+        reflow=0
     )
     
-    total_time = time.time() - start_time
-    logging.info(f"Evaluation completed in {total_time/60:.2f} minutes")
+    # Optionally apply reflow procedure for better one-step generation
+    if args.reflow_steps > 0:
+        for i in range(1, args.reflow_steps+1):
+            logging.info(f"Applying reflow procedure with {i} steps")
+            
+            # Get a batch of source images for reflow
+            source_batch, _ = next(iter(train_loader))
+            source_batch = source_batch.to(args.device)
+            
+            # Apply reflow
+            rf.reflow(
+                source_batch,
+                training_steps=1,
+                batch_size=min(16, source_batch.size(0)),
+                lr=args.learning_rate * 0.1,
+                device=args.device
+            )
+            
+            # Save reflowed model
+            reflowed_model_path = os.path.join(args.output_dir, f'reflowed_model_{i}.pt')
+            torch.save({
+                'model_state_dict': rf.model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'args': vars(args),
+                'reflow_steps': i
+            }, reflowed_model_path)
+            
+            logging.info(f"Reflowed model saved to {reflowed_model_path}")
+
+            evaluate_model(
+                rf.model,
+                test_loader,
+                args.device,
+                num_steps=args.num_steps,
+                output_dir=args.output_dir,
+                reflow=i
+            )
+            evaluate_model(
+                rf.model,
+                test_loader,
+                args.device,
+                num_steps=1,
+                output_dir=args.output_dir,
+                reflow=i
+            )
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train MONAI-based Rectified Flow for MRI Translation')

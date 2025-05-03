@@ -1,0 +1,44 @@
+2025-04-30 19:53:22,806 - INFO - Using device: cuda
+2025-04-30 19:53:22,806 - INFO - Output directory: C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195322
+2025-04-30 19:53:22,807 - INFO - Visualization directory: C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195322\visualizations
+2025-04-30 19:53:22,807 - INFO - Saved configuration to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195322\config.txt
+2025-04-30 19:53:23,130 - INFO - Training on 251 samples
+2025-04-30 19:53:23,131 - INFO - Validating on 54 samples
+2025-04-30 19:53:39,779 - INFO - Source shape: torch.Size([64, 1, 256, 256]), Target shape: torch.Size([64, 1, 256, 256])
+2025-04-30 19:53:39,800 - INFO - Model created with 1,605,178 parameters (1,605,178 trainable)
+2025-04-30 19:54:06,728 - INFO - Epoch 1/1, Train Loss: 1.568963, Val Loss: 0.101459
+2025-04-30 19:54:06,728 - INFO -   Train RF Loss: 0.721848, L1 Loss: 0.693762, SSIM Loss: 1.000467, SSIM Value: 1.0005
+2025-04-30 19:54:06,728 - INFO -   Val SSIM: 0.0257, Val L1: 0.250883
+2025-04-30 19:54:06,762 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195322\best_model.pt
+2025-04-30 19:54:16,449 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195322\checkpoint_epoch_1.pt
+2025-04-30 19:54:16,449 - INFO - Training completed in 0.61 minutes
+2025-04-30 19:54:16,578 - INFO - Saved final model to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195322\final_model.pt
+2025-04-30 19:54:38,896 - INFO - Applying reflow procedure with 1 steps
+2025-04-30 19:54:54,350 - INFO - Reflowed model saved to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195322\reflowed_model_1.pt
+2025-04-30 19:55:16,552 - INFO - Applying reflow procedure with 2 steps
+2025-04-30 19:55:33,384 - INFO - Reflowed model saved to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195322\reflowed_model_2.pt
+2025-04-30 19:56:57,027 - INFO - Using device: cuda
+2025-04-30 19:56:57,028 - INFO - Output directory: C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195657
+2025-04-30 19:56:57,028 - INFO - Visualization directory: C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195657\visualizations
+2025-04-30 19:56:57,029 - INFO - Saved configuration to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195657\config.txt
+2025-04-30 19:56:57,356 - INFO - Training on 251 samples
+2025-04-30 19:56:57,356 - INFO - Validating on 54 samples
+2025-04-30 19:58:52,070 - INFO - Using device: cuda
+2025-04-30 19:58:52,071 - INFO - Output directory: C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195852
+2025-04-30 19:58:52,072 - INFO - Visualization directory: C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195852\visualizations
+2025-04-30 19:58:52,081 - INFO - Saved configuration to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195852\config.txt
+2025-04-30 19:58:52,413 - INFO - Training on 251 samples
+2025-04-30 19:58:52,413 - INFO - Validating on 54 samples
+2025-04-30 19:59:08,821 - INFO - Source shape: torch.Size([64, 1, 256, 256]), Target shape: torch.Size([64, 1, 256, 256])
+2025-04-30 19:59:08,842 - INFO - Model created with 1,605,178 parameters (1,605,178 trainable)
+2025-04-30 19:59:34,988 - INFO - Epoch 1/1, Train Loss: 1.977465, Val Loss: 0.743582
+2025-04-30 19:59:34,989 - INFO -   Train RF Loss: 1.064188, L1 Loss: 0.826532, SSIM Loss: 1.000022, SSIM Value: 1.0000
+2025-04-30 19:59:34,989 - INFO -   Val SSIM: 0.0081, Val L1: 0.806001
+2025-04-30 19:59:35,024 - INFO - Saved best model to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195852\best_model.pt
+2025-04-30 19:59:44,744 - INFO - Saved checkpoint to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195852\checkpoint_epoch_1.pt
+2025-04-30 19:59:44,744 - INFO - Training completed in 0.60 minutes
+2025-04-30 19:59:44,868 - INFO - Saved final model to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195852\final_model.pt
+2025-04-30 20:00:06,963 - INFO - Applying reflow procedure with 1 steps
+2025-04-30 20:00:22,458 - INFO - Reflowed model saved to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195852\reflowed_model_1.pt
+2025-04-30 20:00:44,365 - INFO - Applying reflow procedure with 2 steps
+2025-04-30 20:01:00,243 - INFO - Reflowed model saved to C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195852\reflowed_model_2.pt

@@ -1,0 +1,20 @@
+t1_dir: ./processed_dataset/IXI-T1
+t2_dir: ./processed_dataset/IXI-T2
+train_ratio: 0.7
+val_ratio: 0.15
+test_ratio: 0.15
+features: [32, 64, 128, 256]
+batch_size: 64
+epochs: 1
+learning_rate: 0.0001
+num_workers: 2
+device: cuda
+output_dir: C:\Users\erast\Documents\5214\grid_search_results\step1\run_20250430_195322
+use_scheduler: False
+early_stopping_patience: 5
+num_steps: 1
+reflow_steps: 2
+use_combined_loss: True
+rf_weight: 1.0
+l1_weight: 0.5
+ssim_weight: 0.5
